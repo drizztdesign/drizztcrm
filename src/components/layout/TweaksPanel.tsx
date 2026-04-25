@@ -1,11 +1,13 @@
 "use client";
-import { X, LogOut } from "lucide-react";
+import { useState } from "react";
+import { X, LogOut, Trash2 } from "lucide-react";
 import { useUI } from "@/store/ui";
 import { useTweaks, type Density } from "@/store/tweaks";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/cn";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ACCENTS = [
   "#a8ff3e", "#6bfdff", "#ff7a59", "#b288ff", "#f5b544", "#4ac38a", "#e77fc1", "#6aa7ff",
@@ -14,9 +16,13 @@ const ACCENTS = [
 export function TweaksPanel() {
   const open = useUI((s) => s.tweaksOpen);
   const setOpen = useUI((s) => s.setTweaksOpen);
+  const show = useUI((s) => s.showToast);
   const { t, lang } = useT();
   const { setLang, accent, setAccent, density, setDensity } = useTweaks();
   const router = useRouter();
+  const qc = useQueryClient();
+  const [clearing, setClearing] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   if (!open) return null;
 
@@ -24,6 +30,20 @@ export function TweaksPanel() {
     await createClient().auth.signOut();
     router.replace("/login");
     router.refresh();
+  };
+
+  const clearAllData = async () => {
+    setClearing(true);
+    const { error } = await createClient().rpc("clear_user_data");
+    setClearing(false);
+    setConfirming(false);
+    if (error) {
+      show(error.message, "error");
+    } else {
+      show(lang === "es" ? "Datos eliminados" : "Data cleared", "ok");
+      qc.invalidateQueries();
+      setOpen(false);
+    }
   };
 
   return (
@@ -86,6 +106,42 @@ export function TweaksPanel() {
                 </button>
               ))}
             </div>
+          </Section>
+
+          <Section label={lang === "es" ? "Zona de peligro" : "Danger zone"}>
+            {!confirming ? (
+              <button
+                onClick={() => setConfirming(true)}
+                className="w-full h-10 rounded-lg bg-bg-2 border border-border hover:border-danger hover:text-danger text-[13px] font-medium flex items-center justify-center gap-2 transition-colors"
+              >
+                <Trash2 size={14} strokeWidth={1.5} />
+                {lang === "es" ? "Borrar todos mis datos" : "Delete all my data"}
+              </button>
+            ) : (
+              <div className="border border-danger rounded-lg bg-danger/5 p-3 flex flex-col gap-2.5">
+                <div className="text-[12.5px] text-fg-1 leading-relaxed">
+                  {lang === "es"
+                    ? "Esto eliminará TODOS tus leads, empresas, contactos, tareas y conversaciones. Plantillas, automatizaciones y reglas de scoring se mantienen. ¿Seguro?"
+                    : "This will delete ALL your leads, companies, contacts, tasks and conversations. Templates, automations and scoring rules are kept. Sure?"}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setConfirming(false)}
+                    disabled={clearing}
+                    className="flex-1 h-9 rounded-md bg-bg-2 border border-border text-[12.5px] font-medium hover:border-border-strong disabled:opacity-60"
+                  >
+                    {lang === "es" ? "Cancelar" : "Cancel"}
+                  </button>
+                  <button
+                    onClick={clearAllData}
+                    disabled={clearing}
+                    className="flex-1 h-9 rounded-md bg-danger text-white text-[12.5px] font-semibold hover:brightness-110 disabled:opacity-60"
+                  >
+                    {clearing ? (lang === "es" ? "Borrando…" : "Deleting…") : (lang === "es" ? "Sí, borrar todo" : "Yes, delete all")}
+                  </button>
+                </div>
+              </div>
+            )}
           </Section>
 
         </div>
