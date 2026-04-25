@@ -12,7 +12,6 @@ CRM premium bilingüe (ES/EN) para DRIZZT DESIGN. Built with Next.js 14, Supabas
 - **Row Level Security** — single-tenant por `owner_id = auth.uid()`. Cada usuario ve solo sus datos.
 - **Realtime** — Dashboard y Pipeline se actualizan al vuelo cuando cambian datos.
 - **Onboarding automático**: al registrarte se auto-seedean 19 plantillas, 10 automatizaciones y 8 reglas de scoring.
-- **Seed de ejemplo** — botón "Cargar datos de ejemplo" pobla 16 leads con timeline y tareas, en 1 click.
 - **Bilingüe ES/EN** conmutable en vivo.
 - **Tema oscuro** tipo Linear/Vercel, densidades `compact | regular | cozy`, acento personalizable.
 - **Atajos**: ⌘K busca global, Esc cierra el drawer.
@@ -38,10 +37,6 @@ npm run dev
 Abre http://localhost:3000 y regístrate con tu email.
 
 El proyecto Supabase ya está configurado en `.env.local`. Email confirmation está desactivada (`mailer_autoconfirm: true`) para que el signup sea inmediato.
-
-## Cargar datos de ejemplo
-
-Tras registrarte, haz click en el engranaje (abajo a la izquierda) → **"Cargar datos de ejemplo"**, o en la portada de Inicio si la base está vacía. Se cargan 16 leads bilingües con pipeline, timeline, tareas, etc.
 
 ## Deploy en Netlify / Vercel
 
@@ -78,7 +73,7 @@ src/
 │   ├── providers.tsx      React Query + tweaks effect
 │   └── globals.css        tokens + base CSS
 ├── components/
-│   ├── layout/            Sidebar, Topbar, TweaksPanel, Toast, SeedCTA
+│   ├── layout/            Sidebar, Topbar, TweaksPanel, Toast
 │   ├── kanban/            KanbanBoard, KanbanColumn, LeadCard
 │   ├── lead/              LeadDrawer, TimelineList, Composer
 │   └── icons/             BrandIcons (Instagram/LinkedIn SVGs)

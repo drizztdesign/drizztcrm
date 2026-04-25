@@ -62,8 +62,6 @@ const es: Dict = {
   loading: "Cargando…",
   empty_title: "Nada por aquí todavía",
   empty_body: "Empieza añadiendo tu primer registro.",
-  seed_demo: "Cargar datos de ejemplo",
-  seeding: "Cargando datos…",
 
   pipeline_subtitle: "{n} leads activos · {total} en pipeline",
   drop_here: "Suelta el lead aquí",
@@ -181,8 +179,6 @@ const en: Dict = {
   loading: "Loading…",
   empty_title: "Nothing here yet",
   empty_body: "Start by adding your first record.",
-  seed_demo: "Load demo data",
-  seeding: "Loading…",
 
   pipeline_subtitle: "{n} active leads · {total} in pipeline",
   drop_here: "Drop lead here",

@@ -6,7 +6,6 @@ import { useT } from "@/lib/useT";
 import { cn } from "@/lib/cn";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 const ACCENTS = [
   "#a8ff3e", "#6bfdff", "#ff7a59", "#b288ff", "#f5b544", "#4ac38a", "#e77fc1", "#6aa7ff",
@@ -15,28 +14,11 @@ const ACCENTS = [
 export function TweaksPanel() {
   const open = useUI((s) => s.tweaksOpen);
   const setOpen = useUI((s) => s.setTweaksOpen);
-  const show = useUI((s) => s.showToast);
   const { t, lang } = useT();
   const { setLang, accent, setAccent, density, setDensity } = useTweaks();
   const router = useRouter();
-  const [seeding, setSeeding] = useState(false);
 
   if (!open) return null;
-
-  const seedDemo = async () => {
-    setSeeding(true);
-    const sb = createClient();
-    const { error } = await sb.rpc("seed_demo_data");
-    setSeeding(false);
-    if (error) {
-      show(error.message, "error");
-    } else {
-      show(lang === "es" ? "Datos de ejemplo cargados" : "Demo data loaded", "ok");
-      setOpen(false);
-      router.refresh();
-      window.location.reload();
-    }
-  };
 
   const logout = async () => {
     await createClient().auth.signOut();
@@ -106,20 +88,6 @@ export function TweaksPanel() {
             </div>
           </Section>
 
-          <Section label={lang === "es" ? "Datos" : "Data"}>
-            <button
-              onClick={seedDemo}
-              disabled={seeding}
-              className="w-full h-10 rounded-lg bg-bg-2 border border-border hover:border-border-strong text-[13px] font-medium disabled:opacity-60"
-            >
-              {seeding ? t("seeding") : t("seed_demo")}
-            </button>
-            <p className="text-[11px] text-fg-2 mt-2 leading-relaxed">
-              {lang === "es"
-                ? "Reemplaza tus datos con 16 leads de demo. No se pueden recuperar los datos eliminados."
-                : "Replaces your data with 16 demo leads. Deleted data cannot be recovered."}
-            </p>
-          </Section>
         </div>
 
         <div className="p-[16px_22px] border-t border-border">

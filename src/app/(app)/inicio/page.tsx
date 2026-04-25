@@ -11,7 +11,6 @@ import { cn } from "@/lib/cn";
 import { TimelineList } from "@/components/lead/TimelineList";
 import type { LeadTemp } from "@/lib/supabase/types";
 import { Flame, Zap, Calendar, Check } from "lucide-react";
-import { SeedCTA } from "@/components/layout/SeedCTA";
 
 export default function InicioPage() {
   const { data: deals = [], isLoading } = useDeals();
@@ -49,7 +48,6 @@ export default function InicioPage() {
               {t("home_hello_sub", { n: todayTasks.length, hot: hotLeads.length })}
             </div>
           </div>
-          {deals.length === 0 && <SeedCTA />}
         </div>
 
         <div className="flex gap-2.5 items-stretch flex-wrap mb-6">
