@@ -11,9 +11,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!user) redirect("/login");
 
   return (
-    <div className="grid grid-cols-[240px_1fr] h-full bg-bg-0">
+    <div className="flex h-full bg-bg-0">
       <Sidebar userEmail={user.email ?? ""} />
-      <main className="flex flex-col overflow-hidden bg-bg-0">
+      <main className="flex flex-col overflow-hidden bg-bg-0 flex-1 min-w-0">
         {children}
       </main>
       <TweaksPanel />

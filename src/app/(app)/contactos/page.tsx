@@ -51,7 +51,7 @@ export default function ContactosPage() {
           </button>
         ))}
       </div>
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto p-3 sm:p-6">
         {isLoading && <div className="text-fg-2 text-sm">Cargando…</div>}
         {!isLoading && (
           <div className="grid grid-cols-3 max-[1200px]:grid-cols-2 max-[800px]:grid-cols-1 gap-3.5">

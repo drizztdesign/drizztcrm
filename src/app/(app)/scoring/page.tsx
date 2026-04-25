@@ -22,7 +22,7 @@ export default function ScoringPage() {
   return (
     <>
       <Topbar title={t("nav_scoring")} sub={lang === "es" ? "Priorización automática con reglas" : "Auto-prioritization by rules"} />
-      <div className="flex-1 overflow-auto p-6 max-w-[1400px] mx-auto w-full grid grid-cols-[1.3fr_1fr] gap-6 max-[1100px]:grid-cols-1">
+      <div className="flex-1 overflow-auto p-3 sm:p-6 max-w-[1400px] mx-auto w-full grid grid-cols-[1.3fr_1fr] gap-6 max-[1100px]:grid-cols-1">
         <Panel title={lang === "es" ? "Ranking de leads" : "Lead ranking"}>
           {ranking.map((d, i) => (
             <div

@@ -55,7 +55,7 @@ export default function TareasPage() {
         ))}
       </div>
 
-      <div className="flex-1 overflow-auto p-6 max-w-[900px] mx-auto w-full">
+      <div className="flex-1 overflow-auto p-3 sm:p-6 max-w-[900px] mx-auto w-full">
         <div className="flex items-center gap-2 mb-4">
           <input
             value={newTitle}

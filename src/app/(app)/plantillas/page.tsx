@@ -39,7 +39,7 @@ export default function PlantillasPage() {
   return (
     <>
       <Topbar title={t("nav_templates")} sub={`${templates.length} ${lang === "es" ? "plantillas" : "templates"} · persuasivas, probadas`} />
-      <div className="flex-1 overflow-hidden grid grid-cols-[320px_1fr] gap-5 p-6 max-w-[1400px] mx-auto w-full">
+      <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-[320px_1fr] gap-3 md:gap-5 p-3 md:p-6 max-w-[1400px] mx-auto w-full">
         <div className="border border-border rounded-[12px] bg-bg-1 overflow-y-auto">
           {isLoading && <div className="p-4 text-fg-2 text-sm">Cargando…</div>}
           {filtered.map((tpl) => {

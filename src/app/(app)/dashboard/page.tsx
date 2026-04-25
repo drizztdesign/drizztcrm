@@ -36,7 +36,7 @@ export default function DashboardPage() {
   return (
     <>
       <Topbar title={t("nav_dashboard")} sub={lang === "es" ? "Salud del negocio · Drizzt Design" : "Business health · Drizzt Design"} />
-      <div className="flex-1 overflow-auto p-[28px_32px] max-w-[1400px] mx-auto w-full">
+      <div className="flex-1 overflow-auto p-4 sm:p-[28px_32px] max-w-[1400px] mx-auto w-full">
         <div className="grid grid-cols-4 gap-3 max-[1100px]:grid-cols-2 mb-6">
           <Kpi label={t("kpi_pipeline")}     value={fmtEuro(totals.total, lang)} />
           <Kpi label={t("kpi_weighted")}     value={fmtEuro(totals.weighted, lang)} accent />

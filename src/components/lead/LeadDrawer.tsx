@@ -156,7 +156,7 @@ export function LeadDrawer() {
         {/* BODY */}
         <div className="flex-1 overflow-y-auto">
           {tab === "summary" && (
-            <div className="grid grid-cols-[1fr_320px] gap-6 p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 lg:gap-6 p-4 sm:p-6">
               <div className="flex flex-col gap-4">
                 <Panel title={lang === "es" ? "Información" : "Information"}>
                   <KV label={t("f_contact")}    value={deal.contact?.name ?? "—"} />

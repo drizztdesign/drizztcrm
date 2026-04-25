@@ -12,6 +12,7 @@ export interface Filters {
 interface UIState {
   selectedDealId: string | null;
   tweaksOpen: boolean;
+  sidebarOpen: boolean;
   search: string;
   filters: Filters;
   toast: { id: number; message: string; kind: "ok" | "error" | "info" } | null;
@@ -20,6 +21,8 @@ interface UIState {
   closeDeal: () => void;
   toggleTweaks: () => void;
   setTweaksOpen: (v: boolean) => void;
+  toggleSidebar: () => void;
+  setSidebarOpen: (v: boolean) => void;
   setSearch: (s: string) => void;
   setFilter: <K extends keyof Filters>(k: K, v: Filters[K]) => void;
   clearFilters: () => void;
@@ -32,6 +35,7 @@ const DEFAULT_FILTERS: Filters = { stage: "all", temp: "all", source: "all", tag
 export const useUI = create<UIState>((set) => ({
   selectedDealId: null,
   tweaksOpen: false,
+  sidebarOpen: false,
   search: "",
   filters: DEFAULT_FILTERS,
   toast: null,
@@ -40,6 +44,8 @@ export const useUI = create<UIState>((set) => ({
   closeDeal: () => set({ selectedDealId: null }),
   toggleTweaks: () => set((s) => ({ tweaksOpen: !s.tweaksOpen })),
   setTweaksOpen: (v) => set({ tweaksOpen: v }),
+  toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+  setSidebarOpen: (v) => set({ sidebarOpen: v }),
   setSearch: (s) => set({ search: s }),
   setFilter: (k, v) => set((s) => ({ filters: { ...s.filters, [k]: v } })),
   clearFilters: () => set({ filters: DEFAULT_FILTERS }),

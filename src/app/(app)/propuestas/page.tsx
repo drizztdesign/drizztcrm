@@ -67,7 +67,7 @@ export default function PropuestasPage() {
   return (
     <>
       <Topbar title={t("nav_proposals")} sub={lang === "es" ? "Genera propuestas premium en 2 minutos" : "Build premium proposals in 2 minutes"} />
-      <div className="flex-1 overflow-auto p-6 max-w-[1400px] mx-auto w-full grid grid-cols-[340px_1fr] gap-5 max-[1100px]:grid-cols-1">
+      <div className="flex-1 overflow-auto p-3 sm:p-6 max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-5">
         <div className="flex flex-col gap-3">
           <div className="text-[11px] font-semibold text-fg-2 uppercase tracking-[0.1em]">{lang === "es" ? "Selecciona un lead" : "Pick a lead"}</div>
           <div className="border border-border rounded-[12px] bg-bg-1 max-h-[600px] overflow-y-auto">
@@ -91,7 +91,7 @@ export default function PropuestasPage() {
           </div>
         </div>
 
-        <div className="bg-[#faf8f3] text-[#1a1a1a] rounded-[14px] p-[56px_64px] min-h-[800px] font-serif relative">
+        <div className="bg-[#faf8f3] text-[#1a1a1a] rounded-[14px] p-6 sm:p-[56px_64px] min-h-[600px] sm:min-h-[800px] font-serif relative">
           <h1 className="m-0 mb-2 text-[38px] font-semibold -tracking-[0.02em] font-sans">Propuesta {deal?.company?.name ?? ""}</h1>
           <div className="text-[13px] mb-10 text-[#555] font-sans">
             Preparada para {deal?.contact?.name ?? "—"} · {new Date().toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { day: "numeric", month: "long", year: "numeric" })}

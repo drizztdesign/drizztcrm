@@ -44,7 +44,7 @@ export default function ActividadesPage() {
           </button>
         ))}
       </div>
-      <div className="flex-1 overflow-auto p-6 max-w-[900px] mx-auto w-full">
+      <div className="flex-1 overflow-auto p-3 sm:p-6 max-w-[900px] mx-auto w-full">
         {isLoading && <div className="text-fg-2">Cargando…</div>}
         {!isLoading && <TimelineList events={filtered} />}
       </div>

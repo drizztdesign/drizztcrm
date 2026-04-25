@@ -59,6 +59,11 @@ body {
 button { font-family: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 input, textarea, select { font-family: inherit; color: inherit; }
 
+/* iOS Safari zooms inputs that have font-size < 16px on focus. Forcing 16px on small screens prevents that. */
+@media (max-width: 767px) {
+  input, textarea, select { font-size: 16px !important; }
+}
+
 .tabular { font-variant-numeric: tabular-nums; }
 .mono { font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace; }
 

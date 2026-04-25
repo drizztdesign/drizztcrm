@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import {
-  DndContext, DragOverlay, PointerSensor, KeyboardSensor, useSensor, useSensors,
+  DndContext, DragOverlay, PointerSensor, KeyboardSensor, TouchSensor, useSensor, useSensors,
   closestCenter, type DragEndEvent, type DragStartEvent,
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -47,6 +47,7 @@ export function KanbanBoard() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
     useSensor(KeyboardSensor),
   );
 

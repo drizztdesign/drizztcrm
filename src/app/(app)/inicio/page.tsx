@@ -38,7 +38,7 @@ export default function InicioPage() {
   return (
     <>
       <Topbar title={t("nav_home")} sub={lang === "es" ? "Tu resumen diario" : "Your daily overview"} />
-      <div className="flex-1 overflow-auto p-[28px_32px] max-w-[1400px] mx-auto w-full">
+      <div className="flex-1 overflow-auto p-4 sm:p-[28px_32px] max-w-[1400px] mx-auto w-full">
         <div className="flex items-end justify-between mb-5 gap-6 flex-wrap">
           <div>
             <h2 className="m-0 text-[28px] font-semibold -tracking-[0.02em]">

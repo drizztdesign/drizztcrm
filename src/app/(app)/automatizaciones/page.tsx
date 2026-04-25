@@ -12,7 +12,7 @@ export default function AutomatizacionesPage() {
   return (
     <>
       <Topbar title={t("nav_automations")} sub={lang === "es" ? "10 reglas if-then que trabajan por ti" : "10 if-then rules working for you"} />
-      <div className="flex-1 overflow-auto p-6 max-w-[900px] mx-auto w-full">
+      <div className="flex-1 overflow-auto p-3 sm:p-6 max-w-[900px] mx-auto w-full">
         {isLoading && <div className="text-fg-2">Cargando…</div>}
         <div className="flex flex-col gap-2.5">
           {autos.map((a) => (
