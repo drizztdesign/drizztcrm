@@ -3,25 +3,123 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-0: #0a0b0d;
+  --bg-1: #0f1114;
+  --bg-2: #14171c;
+  --bg-3: #1a1e25;
+  --bg-4: #22272f;
+
+  --border: #23272f;
+  --border-strong: #2e333c;
+
+  --fg-0: #f3f4f6;
+  --fg-1: #c9cdd4;
+  --fg-2: #868b96;
+  --fg-3: #5a5f6b;
+
+  --accent: #a8ff3e;
+  --accent-ink: #0a0b0d;
+  --accent-soft: color-mix(in oklab, var(--accent) 14%, transparent);
+  --accent-strong: color-mix(in oklab, var(--accent) 88%, white);
+
+  --danger: #ff5a47;
+  --warn:   #f5b544;
+  --ok:     #4ac38a;
+  --info:   #6aa7ff;
+  --purple: #b288ff;
+  --pink:   #e77fc1;
+  --teal:   #5ec7d0;
+
+  --dens-row: 44px;
+  --dens-card-pad: 14px;
+  --dens-gap: 14px;
+
+  --shadow-card: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px -12px rgba(0,0,0,0.4);
+  --shadow-pop: 0 20px 60px -20px rgba(0,0,0,0.8), 0 0 0 1px var(--border-strong);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+[data-density="compact"] { --dens-row: 36px; --dens-card-pad: 10px; --dens-gap: 10px; }
+[data-density="cozy"]    { --dens-row: 52px; --dens-card-pad: 18px; --dens-gap: 18px; }
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  font-family: "Inter", "SF Pro Display", -apple-system, system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--fg-0);
+  background: var(--bg-0);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  font-feature-settings: "cv11", "ss01", "ss03";
+  text-wrap: pretty;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+button { font-family: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input, textarea, select { font-family: inherit; color: inherit; }
+
+.tabular { font-variant-numeric: tabular-nums; }
+.mono { font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace; }
+
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 10px; border: 2px solid var(--bg-0); }
+*::-webkit-scrollbar-thumb:hover { background: #3a4049; }
+
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(255,255,255,0.03); }
+.dot-superhot { background: #ff3020; box-shadow: 0 0 0 4px rgba(255, 48, 32, 0.15); }
+.dot-hot  { background: var(--danger); }
+.dot-warm { background: var(--warn); }
+.dot-cold { background: var(--info); }
+.dot-lost { background: #5a5f6b; }
+
+@keyframes sheetIn {
+  from { transform: translateX(40px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+.drawer-enter { animation: sheetIn 280ms cubic-bezier(0.32, 0.72, 0, 1); }
+.backdrop-enter { animation: fadeIn 180ms ease-out; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-2) 0%, var(--bg-3) 50%, var(--bg-2) 100%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 8px;
+}
+
+.tl-line { position: relative; padding-left: 22px; }
+.tl-line::before {
+  content: ""; position: absolute; left: 8px; top: 6px; bottom: 6px;
+  width: 1px; background: var(--border-strong);
+}
+
+.k-col-body.dragover { background: color-mix(in oklab, var(--accent) 5%, transparent); border-radius: 10px; }
+.k-card.dragging { opacity: 0.5; cursor: grabbing; }
+
+.switch {
+  width: 34px; height: 20px;
+  background: var(--bg-3); border-radius: 10px;
+  border: 1px solid var(--border);
+  position: relative;
+  cursor: pointer;
+  transition: background 120ms;
+  flex-shrink: 0;
+}
+.switch.on { background: var(--accent); border-color: var(--accent); }
+.switch::before {
+  content: ""; position: absolute; top: 1.5px; left: 2px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--fg-0);
+  transition: transform 180ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.switch.on::before { transform: translateX(14px); background: var(--accent-ink); }

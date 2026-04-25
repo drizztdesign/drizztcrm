@@ -1,0 +1,100 @@
+"use client";
+import { useMemo, useState } from "react";
+import { Topbar } from "@/components/layout/Topbar";
+import { useContacts } from "@/lib/queries/contacts";
+import { useT } from "@/lib/useT";
+import { useUI } from "@/store/ui";
+import { avatarGradient, mailtoLink, whatsappLink } from "@/lib/format";
+import { cn } from "@/lib/cn";
+import { Mail, MessageCircle, Phone } from "lucide-react";
+
+export default function ContactosPage() {
+  const { data: contacts = [], isLoading } = useContacts();
+  const { t, lang } = useT();
+  const search = useUI((s) => s.search);
+  const [sector, setSector] = useState<string>("all");
+
+  const sectors = useMemo(() => {
+    const s = new Set(contacts.map((c) => c.company?.sector).filter(Boolean) as string[]);
+    return ["all", ...Array.from(s).sort()];
+  }, [contacts]);
+
+  const filtered = useMemo(() => {
+    let out = contacts;
+    if (search) {
+      const q = search.toLowerCase();
+      out = out.filter((c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        (c.company?.name ?? "").toLowerCase().includes(q) ||
+        (c.company?.city ?? "").toLowerCase().includes(q)
+      );
+    }
+    if (sector !== "all") out = out.filter((c) => c.company?.sector === sector);
+    return out.sort((a, b) => a.name.localeCompare(b.name));
+  }, [contacts, search, sector]);
+
+  return (
+    <>
+      <Topbar title={t("nav_contacts")} sub={`${contacts.length} ${lang === "es" ? "contactos" : "contacts"}`} />
+      <div className="px-[22px] py-2.5 border-b border-border flex items-center gap-2 overflow-x-auto">
+        {sectors.map((s) => (
+          <button
+            key={s}
+            onClick={() => setSector(s)}
+            className={cn(
+              "inline-flex items-center px-2.5 py-1 text-[11.5px] rounded-md border whitespace-nowrap",
+              sector === s ? "bg-accent-soft text-accent border-accent" : "bg-bg-2 text-fg-1 border-border hover:border-border-strong"
+            )}
+          >
+            {s === "all" ? t("all") : s}
+          </button>
+        ))}
+      </div>
+      <div className="flex-1 overflow-auto p-6">
+        {isLoading && <div className="text-fg-2 text-sm">Cargando…</div>}
+        {!isLoading && (
+          <div className="grid grid-cols-3 max-[1200px]:grid-cols-2 max-[800px]:grid-cols-1 gap-3.5">
+            {filtered.map((c) => (
+              <div key={c.id} className="bg-bg-1 border border-border rounded-xl p-3.5 flex items-start gap-3 hover:border-border-strong hover:bg-bg-2 transition-colors">
+                <div
+                  className="w-10 h-10 rounded-[10px] grid place-items-center text-[13px] font-semibold text-white shrink-0"
+                  style={{ background: avatarGradient(c.id) }}
+                >
+                  {c.avatar || c.name.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13.5px] font-semibold truncate">{c.name}</div>
+                  <div className="text-[11.5px] text-fg-2 truncate">{c.role || "—"} · {c.company?.name ?? "—"}</div>
+                  <div className="text-[11px] text-fg-3 mt-1 truncate">
+                    {c.company?.sector} · {c.company?.city}
+                  </div>
+                  <div className="flex gap-1.5 mt-2">
+                    {c.phone && (
+                      <a href={whatsappLink(c.phone)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-2 py-0.5 bg-bg-3 rounded-md text-[11px] text-fg-1 hover:text-accent">
+                        <MessageCircle size={10} strokeWidth={1.5} />
+                        WhatsApp
+                      </a>
+                    )}
+                    {c.email && (
+                      <a href={mailtoLink(c.email)} className="inline-flex items-center gap-1 px-2 py-0.5 bg-bg-3 rounded-md text-[11px] text-fg-1 hover:text-accent">
+                        <Mail size={10} strokeWidth={1.5} />
+                        Email
+                      </a>
+                    )}
+                    {c.phone && (
+                      <a href={`tel:${c.phone}`} className="inline-flex items-center gap-1 px-2 py-0.5 bg-bg-3 rounded-md text-[11px] text-fg-1 hover:text-accent">
+                        <Phone size={10} strokeWidth={1.5} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {!filtered.length && <div className="col-span-full text-fg-2 text-center py-10">{t("empty_title")}</div>}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}

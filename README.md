@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DRIZZT DESIGN · CRM
 
-## Getting Started
+CRM premium bilingüe (ES/EN) para DRIZZT DESIGN. Built with Next.js 14, Supabase y Tailwind.
 
-First, run the development server:
+## Características
+
+- **Auth completa** (email + password) con middleware de rutas protegidas.
+- **10+ vistas funcionales**: Inicio, Pipeline Kanban, Contactos, Empresas, Actividades, Dashboard, Tareas, Plantillas, Propuestas, Scoring, Automatizaciones, Implementación.
+- **Pipeline Kanban** con drag & drop (@dnd-kit) y optimistic updates.
+- **LeadDrawer** con tabs: resumen, conversación, problemas, notas. Composer con WhatsApp / Email / Instagram / Nota.
+- **Base de datos normalizada**: `companies`, `contacts`, `deals`, `tasks`, `timeline_events`, `templates`, `automations`, `scoring_rules`, `proposals`.
+- **Row Level Security** — single-tenant por `owner_id = auth.uid()`. Cada usuario ve solo sus datos.
+- **Realtime** — Dashboard y Pipeline se actualizan al vuelo cuando cambian datos.
+- **Onboarding automático**: al registrarte se auto-seedean 19 plantillas, 10 automatizaciones y 8 reglas de scoring.
+- **Seed de ejemplo** — botón "Cargar datos de ejemplo" pobla 16 leads con timeline y tareas, en 1 click.
+- **Bilingüe ES/EN** conmutable en vivo.
+- **Tema oscuro** tipo Linear/Vercel, densidades `compact | regular | cozy`, acento personalizable.
+- **Atajos**: ⌘K busca global, Esc cierra el drawer.
+
+## Stack
+
+- **Next.js 14** (App Router) + TypeScript + Tailwind CSS 3
+- **Supabase** (Postgres + Auth + Realtime) con RLS
+- **@supabase/ssr** para auth con cookies
+- **@tanstack/react-query** para cache + invalidación + optimistic updates
+- **@dnd-kit** para el drag & drop del Kanban
+- **Zustand** para UI state
+- **Radix UI** primitivos (Dialog, Dropdown, Tooltip, Popover)
+- **lucide-react** para iconos
+
+## Ejecutar en local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre http://localhost:3000 y regístrate con tu email.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+El proyecto Supabase ya está configurado en `.env.local`. Email confirmation está desactivada (`mailer_autoconfirm: true`) para que el signup sea inmediato.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Cargar datos de ejemplo
 
-## Learn More
+Tras registrarte, haz click en el engranaje (abajo a la izquierda) → **"Cargar datos de ejemplo"**, o en la portada de Inicio si la base está vacía. Se cargan 16 leads bilingües con pipeline, timeline, tareas, etc.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy en Netlify / Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Vercel** (recomendado para Next.js): `vercel` y listo. Variables de entorno:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Netlify**: instala `@netlify/plugin-nextjs` y conecta el repo.
 
-## Deploy on Vercel
+Antes de producción, recuerda:
+- Desactivar `mailer_autoconfirm` si quieres confirmación de email real.
+- Rotar el `SUPABASE_ACCESS_TOKEN` si lo expusiste.
+- Configurar `site_url` en Supabase al dominio real.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Base de datos
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Las migraciones están en `supabase/migrations/`:
+
+- `0001_init.sql` — tablas, enums, índices, RLS, realtime publication.
+- `0002_user_onboarding.sql` — seed por usuario nuevo (plantillas, automatizaciones, reglas de scoring).
+- `0003_seed_rpc.sql` — RPC `seed_demo_data()` para cargar leads de ejemplo.
+
+Ya aplicadas al proyecto vía Management API (no hace falta volver a correrlas).
+
+## Estructura
+
+```
+src/
+├── app/
+│   ├── (auth)/            login, signup
+│   ├── (app)/             layout + 12 rutas protegidas
+│   ├── auth/signout/      route handler
+│   ├── layout.tsx         root (Inter + JetBrains Mono)
+│   ├── providers.tsx      React Query + tweaks effect
+│   └── globals.css        tokens + base CSS
+├── components/
+│   ├── layout/            Sidebar, Topbar, TweaksPanel, Toast, SeedCTA
+│   ├── kanban/            KanbanBoard, KanbanColumn, LeadCard
+│   ├── lead/              LeadDrawer, TimelineList, Composer
+│   └── icons/             BrandIcons (Instagram/LinkedIn SVGs)
+├── lib/
+│   ├── supabase/          client + server + middleware + types
+│   ├── queries/           hooks TanStack Query
+│   ├── domain.ts          stage/temp/source metadata + pipeline totals
+│   ├── format.ts          fmtEuro, fmtDate, mailtoLink, whatsappLink
+│   ├── cn.ts              class merger
+│   ├── i18n.ts            strings ES/EN
+│   └── useT.ts            hook t()
+├── store/                 Zustand (ui + tweaks)
+└── middleware.ts          redirects no-auth → /login
+```
+
+## Smoke test
+
+`node scripts/full-debug.mjs` — crea 2 usuarios temporales, verifica RLS multi-tenant, mutations, cleanup. Requiere email real (e.g. `@gmail.com`).
+
+## Seguridad
+
+**Importante**: el `SUPABASE_ACCESS_TOKEN` nunca se almacena en archivos. Solo se usó en memoria para aplicar migraciones vía Management API. Rótalo en https://supabase.com/dashboard/account/tokens si lo pegaste en cualquier sitio inseguro.
