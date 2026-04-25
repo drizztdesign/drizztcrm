@@ -9,8 +9,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 30_000,
+            // Realtime subscriptions invalidate caches when data changes,
+            // so we don't need aggressive auto-refetching.
+            staleTime: 5 * 60_000,        // 5 min — treat data as fresh
+            gcTime: 30 * 60_000,           // 30 min — keep data in memory across navigations
             refetchOnWindowFocus: false,
+            refetchOnMount: false,         // re-mounting a page reuses cache instantly
+            refetchOnReconnect: false,
           },
         },
       })

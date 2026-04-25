@@ -1,14 +1,12 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { TimelineEvent, TimelineKind } from "@/lib/supabase/types";
 
 export function useTimeline(dealId: string | null) {
   const sb = createClient();
-  const qc = useQueryClient();
 
-  const q = useQuery({
+  return useQuery({
     queryKey: ["timeline", dealId],
     enabled: !!dealId,
     queryFn: async (): Promise<TimelineEvent[]> => {
@@ -22,27 +20,11 @@ export function useTimeline(dealId: string | null) {
       return (data ?? []) as TimelineEvent[];
     },
   });
-
-  useEffect(() => {
-    if (!dealId) return;
-    const channel = sb
-      .channel(`timeline-${dealId}-${crypto.randomUUID()}`)
-      .on("postgres_changes",
-        { event: "*", schema: "public", table: "timeline_events", filter: `deal_id=eq.${dealId}` },
-        () => qc.invalidateQueries({ queryKey: ["timeline", dealId] })
-      )
-      .subscribe();
-    return () => { void sb.removeChannel(channel); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dealId]);
-
-  return q;
 }
 
 export function useAllTimeline(limit = 50) {
   const sb = createClient();
-  const qc = useQueryClient();
-  const q = useQuery({
+  return useQuery({
     queryKey: ["timeline-all", limit],
     queryFn: async (): Promise<TimelineEvent[]> => {
       const { data, error } = await sb
@@ -54,19 +36,6 @@ export function useAllTimeline(limit = 50) {
       return (data ?? []) as unknown as TimelineEvent[];
     },
   });
-
-  useEffect(() => {
-    const channel = sb
-      .channel(`timeline-all-${crypto.randomUUID()}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "timeline_events" }, () => {
-        qc.invalidateQueries({ queryKey: ["timeline-all"] });
-      })
-      .subscribe();
-    return () => { void sb.removeChannel(channel); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return q;
 }
 
 export function useAddTimelineEvent() {

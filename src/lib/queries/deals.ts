@@ -1,6 +1,5 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Deal, DealWithRelations, LeadStage } from "@/lib/supabase/types";
 import { nanoid } from "nanoid";
@@ -9,9 +8,8 @@ const DEALS_KEY = ["deals"] as const;
 
 export function useDeals() {
   const sb = createClient();
-  const qc = useQueryClient();
 
-  const q = useQuery({
+  return useQuery({
     queryKey: DEALS_KEY,
     queryFn: async (): Promise<DealWithRelations[]> => {
       const { data, error } = await sb
@@ -22,19 +20,6 @@ export function useDeals() {
       return (data ?? []) as unknown as DealWithRelations[];
     },
   });
-
-  useEffect(() => {
-    const channel = sb
-      .channel(`deals-realtime-${crypto.randomUUID()}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "deals" }, () => {
-        qc.invalidateQueries({ queryKey: DEALS_KEY });
-      })
-      .subscribe();
-    return () => { void sb.removeChannel(channel); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return q;
 }
 
 export function useDeal(id: string | null) {

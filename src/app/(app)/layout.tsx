@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TweaksPanel } from "@/components/layout/TweaksPanel";
 import { Toast } from "@/components/layout/Toast";
 import { LeadDrawer } from "@/components/lead/LeadDrawer";
+import { RealtimeProvider } from "@/components/realtime/RealtimeProvider";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const sb = createClient();
@@ -19,6 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <TweaksPanel />
       <LeadDrawer />
       <Toast />
+      <RealtimeProvider />
     </div>
   );
 }

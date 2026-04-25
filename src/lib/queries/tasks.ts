@@ -1,13 +1,11 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Task, TaskKind, TaskPriority } from "@/lib/supabase/types";
 
 export function useTasks() {
   const sb = createClient();
-  const qc = useQueryClient();
-  const q = useQuery({
+  return useQuery({
     queryKey: ["tasks"],
     queryFn: async (): Promise<(Task & { deal?: { id: string; title: string; code: string } | null })[]> => {
       const { data, error } = await sb
@@ -19,19 +17,6 @@ export function useTasks() {
       return (data ?? []) as unknown as (Task & { deal?: { id: string; title: string; code: string } | null })[];
     },
   });
-
-  useEffect(() => {
-    const channel = sb
-      .channel(`tasks-realtime-${crypto.randomUUID()}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, () => {
-        qc.invalidateQueries({ queryKey: ["tasks"] });
-      })
-      .subscribe();
-    return () => { void sb.removeChannel(channel); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return q;
 }
 
 export function useToggleTask() {
