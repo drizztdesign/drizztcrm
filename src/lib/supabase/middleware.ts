@@ -35,9 +35,13 @@ export async function updateSession(request: NextRequest) {
   // recovery session created by Supabase from the email link, so they are
   // authenticated when they arrive. We want the normal authenticated flow.
   const isResetPassword = pathname.startsWith("/reset-password");
-  const isPublic = pathname === "/favicon.ico" || pathname.startsWith("/_next") || pathname.startsWith("/api/public");
+  // API routes do their own auth (per-route checks). Critically, the cron
+  // endpoints under /api/email/*-cron must bypass session checks because
+  // Vercel Cron has no user session — it sends a Bearer token instead.
+  const isApi = pathname.startsWith("/api/");
+  const isPublic = pathname === "/favicon.ico" || pathname.startsWith("/_next");
 
-  if (!user && !isAuthRoute && !isPublic && !isResetPassword) {
+  if (!user && !isAuthRoute && !isPublic && !isResetPassword && !isApi) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
