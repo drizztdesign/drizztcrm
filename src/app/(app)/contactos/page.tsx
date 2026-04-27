@@ -6,13 +6,16 @@ import { useT } from "@/lib/useT";
 import { useUI } from "@/store/ui";
 import { avatarGradient, mailtoLink, whatsappLink } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { Mail, MessageCircle, Phone } from "lucide-react";
+import { Mail, MessageCircle, Phone, Pencil } from "lucide-react";
+import { EditContactDialog } from "@/components/contacts/EditContactDialog";
+import type { Contact, Company } from "@/lib/supabase/types";
 
 export default function ContactosPage() {
   const { data: contacts = [], isLoading } = useContacts();
   const { t, lang } = useT();
   const search = useUI((s) => s.search);
   const [sector, setSector] = useState<string>("all");
+  const [editing, setEditing] = useState<(Contact & { company?: Company | null }) | null>(null);
 
   const sectors = useMemo(() => {
     const s = new Set(contacts.map((c) => c.company?.sector).filter(Boolean) as string[]);
@@ -56,7 +59,7 @@ export default function ContactosPage() {
         {!isLoading && (
           <div className="grid grid-cols-3 max-[1200px]:grid-cols-2 max-[800px]:grid-cols-1 gap-3.5">
             {filtered.map((c) => (
-              <div key={c.id} className="bg-bg-1 border border-border rounded-xl p-3.5 flex items-start gap-3 hover:border-border-strong hover:bg-bg-2 transition-colors">
+              <div key={c.id} className="bg-bg-1 border border-border rounded-xl p-3.5 flex items-start gap-3 hover:border-border-strong hover:bg-bg-2 transition-colors group relative">
                 <div
                   className="w-10 h-10 rounded-[10px] grid place-items-center text-[13px] font-semibold text-white shrink-0"
                   style={{ background: avatarGradient(c.id) }}
@@ -69,7 +72,7 @@ export default function ContactosPage() {
                   <div className="text-[11px] text-fg-3 mt-1 truncate">
                     {c.company?.sector} · {c.company?.city}
                   </div>
-                  <div className="flex gap-1.5 mt-2">
+                  <div className="flex gap-1.5 mt-2 flex-wrap">
                     {c.phone && (
                       <a href={whatsappLink(c.phone)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-2 py-0.5 bg-bg-3 rounded-md text-[11px] text-fg-1 hover:text-accent">
                         <MessageCircle size={10} strokeWidth={1.5} />
@@ -89,12 +92,20 @@ export default function ContactosPage() {
                     )}
                   </div>
                 </div>
+                <button
+                  onClick={() => setEditing(c)}
+                  className="absolute top-2 right-2 p-1.5 rounded-md text-fg-3 hover:text-accent hover:bg-bg-3 opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 max-md:opacity-60"
+                  aria-label="Edit contact"
+                >
+                  <Pencil size={13} strokeWidth={1.5} />
+                </button>
               </div>
             ))}
             {!filtered.length && <div className="col-span-full text-fg-2 text-center py-10">{t("empty_title")}</div>}
           </div>
         )}
       </div>
+      <EditContactDialog contact={editing} onClose={() => setEditing(null)} />
     </>
   );
 }

@@ -1,11 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
-import { X, Mail, Phone, Globe, MapPin, Tag, Trash2, Plus, Check } from "lucide-react";
+import { X, Mail, Phone, Globe, MapPin, Tag, Trash2, Plus, Check, Send, MessageCircle } from "lucide-react";
 import { useUI } from "@/store/ui";
 import { useT } from "@/lib/useT";
 import { useDeal, useUpdateDeal, useDeleteDeal } from "@/lib/queries/deals";
 import { useTimeline } from "@/lib/queries/timeline";
 import { useTasks, useCreateTask, useToggleTask, useDeleteTask } from "@/lib/queries/tasks";
+import { EditTaskDialog } from "@/components/tasks/EditTaskDialog";
+import { SendEmailDialog } from "@/components/email/SendEmailDialog";
+import { SendWhatsAppDialog } from "@/components/whatsapp/SendWhatsAppDialog";
+import type { Task } from "@/lib/supabase/types";
 import { STAGE_ORDER, STAGE_META, TEMP_META, SOURCE_META, PROJECT_META, PAIN_META, probabilityFor, dealValue } from "@/lib/domain";
 import { fmtEuro, avatarGradient, daysBetween, mailtoLink, whatsappLink } from "@/lib/format";
 import { cn } from "@/lib/cn";
@@ -21,6 +25,8 @@ export function LeadDrawer() {
   const { t, lang } = useT();
   const { data: deal } = useDeal(id);
   const [tab, setTab] = useState<Tab>("summary");
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [waOpen, setWaOpen] = useState(false);
   const updateDeal = useUpdateDeal();
   const deleteDeal = useDeleteDeal();
   const show = useUI((s) => s.showToast);
@@ -96,6 +102,22 @@ export function LeadDrawer() {
             </div>
           </div>
           <div className="flex gap-1.5 ml-auto">
+            <button
+              onClick={() => setWaOpen(true)}
+              className="w-9 h-9 grid place-items-center rounded-lg bg-bg-2 border border-border hover:border-[#25D366] hover:text-[#25D366] transition-colors"
+              title={lang === "es" ? "Enviar WhatsApp" : "Send WhatsApp"}
+              disabled={!deal.contact?.phone}
+            >
+              <MessageCircle size={15} strokeWidth={1.5} />
+            </button>
+            <button
+              onClick={() => setEmailOpen(true)}
+              className="w-9 h-9 grid place-items-center rounded-lg bg-bg-2 border border-border hover:border-accent hover:text-accent transition-colors"
+              title={lang === "es" ? "Enviar email" : "Send email"}
+              disabled={!deal.contact?.email}
+            >
+              <Send size={15} strokeWidth={1.5} />
+            </button>
             <button
               onClick={onDelete}
               className="w-9 h-9 grid place-items-center rounded-lg bg-bg-2 border border-border hover:border-danger hover:text-danger transition-colors"
@@ -261,6 +283,8 @@ export function LeadDrawer() {
           )}
         </div>
       </aside>
+      <SendEmailDialog deal={emailOpen ? deal : null} onClose={() => setEmailOpen(false)} />
+      <SendWhatsAppDialog deal={waOpen ? deal : null} onClose={() => setWaOpen(false)} />
     </>
   );
 }
@@ -491,6 +515,7 @@ function TasksPanel({ dealId }: { dealId: string }) {
   const del = useDeleteTask();
   const { lang } = useT();
   const [title, setTitle] = useState("");
+  const [editing, setEditing] = useState<Task | null>(null);
 
   const add = () => {
     if (!title.trim()) return;
@@ -521,12 +546,17 @@ function TasksPanel({ dealId }: { dealId: string }) {
             >
               {task.done && <Check size={10} strokeWidth={3} className="text-accent-ink" />}
             </button>
-            <span className={cn("flex-1 truncate", task.done && "line-through text-fg-3")}>{task.title}</span>
+            <span
+              onClick={() => setEditing(task)}
+              className={cn("flex-1 truncate cursor-pointer hover:text-accent", task.done && "line-through text-fg-3 hover:text-fg-3")}
+            >
+              {task.title}
+            </span>
             <span className="text-[10.5px] text-fg-3 mono shrink-0">{task.due}</span>
             <button
               type="button"
               onClick={() => del.mutate(task.id)}
-              className="text-fg-3 hover:text-danger opacity-0 group-hover:opacity-100"
+              className="text-fg-3 hover:text-danger md:opacity-0 md:group-hover:opacity-100"
               aria-label="delete task"
             >
               <X size={12} strokeWidth={1.5} />
@@ -552,6 +582,7 @@ function TasksPanel({ dealId }: { dealId: string }) {
           <Plus size={14} strokeWidth={2} />
         </button>
       </div>
+      <EditTaskDialog task={editing} onClose={() => setEditing(null)} />
     </div>
   );
 }

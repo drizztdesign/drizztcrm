@@ -139,7 +139,8 @@ export interface Automation {
   enabled: boolean;
   trigger: Record<string, unknown>;
   action: Record<string, unknown>;
-  stats: { fires: number; lastFiredAt: string | null };
+  stats: { fires: number; lastFiredAt?: string | null };
+  last_run_at?: string | null;
   created_at: string;
 }
 

@@ -57,7 +57,12 @@ function LoginInner() {
           {loading ? t("auth_loading") : t("auth_login")}
         </button>
       </form>
-      <p className="mt-5 text-[12px] text-fg-2 text-center">
+      <p className="mt-3 text-[12px] text-fg-2 text-center">
+        <Link href="/forgot-password" className="text-fg-2 hover:text-accent hover:underline">
+          {t("auth_forgot")}
+        </Link>
+      </p>
+      <p className="mt-3 text-[12px] text-fg-2 text-center">
         {t("auth_no_account")}{" "}
         <Link href="/signup" className="text-accent hover:underline">
           {t("auth_sign_up_cta")}

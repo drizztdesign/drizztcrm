@@ -5,6 +5,8 @@ import { TweaksPanel } from "@/components/layout/TweaksPanel";
 import { Toast } from "@/components/layout/Toast";
 import { LeadDrawer } from "@/components/lead/LeadDrawer";
 import { RealtimeProvider } from "@/components/realtime/RealtimeProvider";
+import { CommandPalette } from "@/components/cmd/CommandPalette";
+import { AutomationsWatcher } from "@/components/automations/AutomationsWatcher";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const sb = createClient();
@@ -19,8 +21,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </main>
       <TweaksPanel />
       <LeadDrawer />
+      <CommandPalette />
       <Toast />
       <RealtimeProvider />
+      <AutomationsWatcher />
     </div>
   );
 }

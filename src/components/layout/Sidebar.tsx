@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import {
   Home, Kanban, Users, Building2, Activity, LayoutDashboard, Inbox,
-  FileText, Sparkles, Target, Zap, Book, Settings, X,
+  FileText, Sparkles, Target, Zap, Book, Settings, X, Search,
 } from "lucide-react";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/cn";
@@ -21,6 +21,7 @@ const NAV = [
     { href: "/tareas",           icon: Inbox,             key: "nav_tasks" },
   ]},
   { section: "sales", items: [
+    { href: "/buscador",         icon: Search,            key: "nav_finder" },
     { href: "/plantillas",       icon: FileText,          key: "nav_templates" },
     { href: "/propuestas",       icon: Sparkles,          key: "nav_proposals" },
     { href: "/scoring",          icon: Target,            key: "nav_scoring" },

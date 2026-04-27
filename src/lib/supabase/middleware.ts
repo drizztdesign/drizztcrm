@@ -26,10 +26,18 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/signup") || pathname.startsWith("/auth");
+  const isAuthRoute =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/signup") ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/forgot-password");
+  // /reset-password is intentionally NOT an auth route: users land here with a
+  // recovery session created by Supabase from the email link, so they are
+  // authenticated when they arrive. We want the normal authenticated flow.
+  const isResetPassword = pathname.startsWith("/reset-password");
   const isPublic = pathname === "/favicon.ico" || pathname.startsWith("/_next") || pathname.startsWith("/api/public");
 
-  if (!user && !isAuthRoute && !isPublic) {
+  if (!user && !isAuthRoute && !isPublic && !isResetPassword) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);

@@ -5,7 +5,9 @@ import { useTasks, useToggleTask, useCreateTask, useDeleteTask } from "@/lib/que
 import { useT } from "@/lib/useT";
 import { useUI } from "@/store/ui";
 import { cn } from "@/lib/cn";
-import { Check, X, Plus } from "lucide-react";
+import { Check, X, Plus, Pencil } from "lucide-react";
+import { EditTaskDialog } from "@/components/tasks/EditTaskDialog";
+import type { Task } from "@/lib/supabase/types";
 
 type Filter = "today" | "overdue" | "week" | "done" | "all";
 
@@ -19,6 +21,7 @@ export default function TareasPage() {
 
   const [filter, setFilter] = useState<Filter>("today");
   const [newTitle, setNewTitle] = useState("");
+  const [editing, setEditing] = useState<Task | null>(null);
 
   const filtered = useMemo(() => {
     const by = (q: string) => tasks.filter((x) => !x.done && (x.due === q || new RegExp(`^${q}`, "i").test(x.due)));
@@ -97,11 +100,19 @@ export default function TareasPage() {
                 </div>
                 <span className={cn(
                   "text-[11.5px] rounded-md px-2 py-0.5 tabular shrink-0",
-                  task.priority === "high" ? "bg-danger/15 text-danger" : "bg-bg-3 text-fg-1"
+                  task.priority === "urgent" || task.priority === "high" ? "bg-danger/15 text-danger" : "bg-bg-3 text-fg-1"
                 )}>{task.due}</span>
                 <button
+                  onClick={() => setEditing(task)}
+                  className="md:opacity-0 md:group-hover:opacity-100 text-fg-3 hover:text-accent transition-opacity"
+                  aria-label="Edit task"
+                >
+                  <Pencil size={13} strokeWidth={1.5} />
+                </button>
+                <button
                   onClick={() => del.mutate(task.id)}
-                  className="opacity-0 group-hover:opacity-100 text-fg-3 hover:text-danger transition-opacity"
+                  className="md:opacity-0 md:group-hover:opacity-100 text-fg-3 hover:text-danger transition-opacity"
+                  aria-label="Delete task"
                 >
                   <X size={14} strokeWidth={1.5} />
                 </button>
@@ -110,6 +121,7 @@ export default function TareasPage() {
           </div>
         )}
       </div>
+      <EditTaskDialog task={editing} onClose={() => setEditing(null)} />
     </>
   );
 }

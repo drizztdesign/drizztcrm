@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { X, LogOut, Trash2 } from "lucide-react";
+import { X, LogOut, Trash2, Download, RefreshCw } from "lucide-react";
 import { useUI } from "@/store/ui";
 import { useTweaks, type Density } from "@/store/tweaks";
 import { useT } from "@/lib/useT";
@@ -8,6 +8,8 @@ import { cn } from "@/lib/cn";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { useDeals } from "@/lib/queries/deals";
+import { dealsToCSV, downloadCSV } from "@/lib/csv";
 
 const ACCENTS = [
   "#a8ff3e", "#6bfdff", "#ff7a59", "#b288ff", "#f5b544", "#4ac38a", "#e77fc1", "#6aa7ff",
@@ -21,10 +23,34 @@ export function TweaksPanel() {
   const { setLang, accent, setAccent, density, setDensity } = useTweaks();
   const router = useRouter();
   const qc = useQueryClient();
+  const { data: deals = [] } = useDeals();
   const [clearing, setClearing] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [recomputing, setRecomputing] = useState(false);
 
   if (!open) return null;
+
+  const exportCSV = () => {
+    const csv = dealsToCSV(deals);
+    const date = new Date().toISOString().slice(0, 10);
+    downloadCSV(`drizzt-crm-leads-${date}.csv`, csv);
+    show(lang === "es" ? `${deals.length} leads exportados` : `${deals.length} leads exported`, "ok");
+  };
+
+  const recomputeScores = async () => {
+    setRecomputing(true);
+    const { data, error } = await createClient().rpc("recompute_all_scores");
+    setRecomputing(false);
+    if (error) {
+      show(error.message, "error");
+    } else {
+      show(
+        lang === "es" ? `Scoring recalculado en ${data ?? 0} leads` : `Scoring recomputed for ${data ?? 0} leads`,
+        "ok"
+      );
+      qc.invalidateQueries({ queryKey: ["deals"] });
+    }
+  };
 
   const logout = async () => {
     await createClient().auth.signOut();
@@ -106,6 +132,32 @@ export function TweaksPanel() {
                 </button>
               ))}
             </div>
+          </Section>
+
+          <Section label={lang === "es" ? "Datos" : "Data"}>
+            <button
+              onClick={exportCSV}
+              disabled={deals.length === 0}
+              className="w-full h-10 rounded-lg bg-bg-2 border border-border hover:border-border-strong text-[13px] font-medium flex items-center justify-center gap-2 disabled:opacity-60 mb-2"
+            >
+              <Download size={14} strokeWidth={1.5} />
+              {lang === "es" ? `Descargar leads CSV (${deals.length})` : `Download leads CSV (${deals.length})`}
+            </button>
+            <button
+              onClick={recomputeScores}
+              disabled={recomputing || deals.length === 0}
+              className="w-full h-10 rounded-lg bg-bg-2 border border-border hover:border-border-strong text-[13px] font-medium flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              <RefreshCw size={14} strokeWidth={1.5} className={recomputing ? "animate-spin" : ""} />
+              {recomputing
+                ? lang === "es" ? "Recalculando…" : "Recomputing…"
+                : lang === "es" ? "Recalcular scoring" : "Recompute scoring"}
+            </button>
+            <p className="text-[11px] text-fg-2 mt-2 leading-relaxed">
+              {lang === "es"
+                ? "El scoring se recalcula solo al editar un lead. Usa este botón para reaplicar las reglas a todos tras cambiar pesos."
+                : "Scoring auto-recalculates when you edit a lead. Use this button to reapply rules to all leads after changing weights."}
+            </p>
           </Section>
 
           <Section label={lang === "es" ? "Zona de peligro" : "Danger zone"}>

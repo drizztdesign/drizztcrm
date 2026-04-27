@@ -18,7 +18,13 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "DRIZZT DESIGN · CRM",
   description: "CRM premium bilingüe para DRIZZT DESIGN",
-  icons: { icon: "/favicon.ico" },
+  // Icons are auto-detected from src/app/icon.tsx and src/app/apple-icon.tsx
+  // Manifest is auto-detected from src/app/manifest.ts
+  appleWebApp: {
+    capable: true,
+    title: "Drizzt CRM",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport = {

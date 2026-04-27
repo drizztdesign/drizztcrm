@@ -10,6 +10,7 @@ export function Topbar({ title, sub }: { title: string; sub?: string }) {
   const search = useUI((s) => s.search);
   const setSearch = useUI((s) => s.setSearch);
   const toggleSidebar = useUI((s) => s.toggleSidebar);
+  const setCmdOpen = useUI((s) => s.setCmdOpen);
   const [newOpen, setNewOpen] = useState(false);
 
   return (
@@ -36,8 +37,21 @@ export function Topbar({ title, sub }: { title: string; sub?: string }) {
             placeholder={t("search_placeholder")}
             className="bg-transparent border-0 outline-none w-full text-[13px] text-fg-0 placeholder:text-fg-3"
           />
-          <span className="text-[10.5px] text-fg-3 border border-border rounded px-1 py-px font-mono">⌘K</span>
+          <button
+            onClick={() => setCmdOpen(true)}
+            className="text-[10.5px] text-fg-3 border border-border rounded px-1 py-px font-mono hover:text-fg-1 hover:border-border-strong"
+            aria-label="Open command palette"
+          >
+            ⌘K
+          </button>
         </div>
+        <button
+          onClick={() => setCmdOpen(true)}
+          aria-label="Search"
+          className="md:hidden h-9 w-9 grid place-items-center rounded-lg border border-border bg-bg-2 text-fg-1 hover:bg-bg-3 shrink-0"
+        >
+          <Search size={16} strokeWidth={1.5} />
+        </button>
 
         <button
           onClick={() => setNewOpen(true)}

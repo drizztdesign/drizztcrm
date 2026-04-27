@@ -63,6 +63,18 @@ export function useCreateTask() {
   });
 }
 
+export function useUpdateTask() {
+  const sb = createClient();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Task> }) => {
+      const { error } = await sb.from("tasks").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+}
+
 export function useDeleteTask() {
   const sb = createClient();
   const qc = useQueryClient();

@@ -62,8 +62,16 @@ export function KanbanBoard() {
     const overId = String(over.id);
     const activeId = String(active.id);
 
-    // Dropped into a column
-    const newStage = STAGE_ORDER.includes(overId as LeadStage) ? (overId as LeadStage) : null;
+    // The drop target can be either a column (id = stage) or a card (id = deal.id).
+    // If it's a card, we resolve to that card's stage so dropping over any card in
+    // a column counts as dropping into the column.
+    let newStage: LeadStage | null = STAGE_ORDER.includes(overId as LeadStage)
+      ? (overId as LeadStage)
+      : null;
+    if (!newStage) {
+      const overDeal = deals.find((d) => d.id === overId);
+      if (overDeal) newStage = overDeal.stage;
+    }
     if (!newStage) return;
 
     const deal = deals.find((d) => d.id === activeId);
@@ -73,7 +81,7 @@ export function KanbanBoard() {
       { id: activeId, stage: newStage },
       {
         onError: (err) => show(err instanceof Error ? err.message : "Error", "error"),
-        onSuccess: () => show(lang === "es" ? `Lead movido a ${STAGE_META[newStage].labelEs}` : `Lead moved to ${STAGE_META[newStage].labelEn}`, "ok"),
+        onSuccess: () => show(lang === "es" ? `Lead movido a ${STAGE_META[newStage!].labelEs}` : `Lead moved to ${STAGE_META[newStage!].labelEn}`, "ok"),
       }
     );
   };
