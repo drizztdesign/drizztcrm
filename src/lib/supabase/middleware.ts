@@ -1,6 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// CRITICAL: API routes (/api/*) skip the session redirect. Each API route
+// runs its own auth check (per-user via Supabase cookies, or Bearer token /
+// secret query for cron endpoints). Without this skip, Vercel Cron requests
+// would be redirected to /login and never reach the cron handler.
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
