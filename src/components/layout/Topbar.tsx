@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Plus, Menu } from "lucide-react";
 import { useT } from "@/lib/useT";
 import { useUI } from "@/store/ui";
@@ -12,6 +12,12 @@ export function Topbar({ title, sub }: { title: string; sub?: string }) {
   const toggleSidebar = useUI((s) => s.toggleSidebar);
   const setCmdOpen = useUI((s) => s.setCmdOpen);
   const [newOpen, setNewOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setNewOpen(true);
+    window.addEventListener("crm:new-lead", handler);
+    return () => window.removeEventListener("crm:new-lead", handler);
+  }, []);
 
   return (
     <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-[22px] py-3 border-b border-border bg-bg-0 min-h-[56px] shrink-0">

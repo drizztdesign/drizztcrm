@@ -24,6 +24,17 @@ export default function ScoringPage() {
       <Topbar title={t("nav_scoring")} sub={lang === "es" ? "Priorización automática con reglas" : "Auto-prioritization by rules"} />
       <div className="flex-1 overflow-auto p-3 sm:p-6 max-w-[1400px] mx-auto w-full grid grid-cols-[1.3fr_1fr] gap-6 max-[1100px]:grid-cols-1">
         <Panel title={lang === "es" ? "Ranking de leads" : "Lead ranking"}>
+          {ranking.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-12 text-center gap-2">
+              <div className="text-[32px] opacity-20">📊</div>
+              <div className="text-[13.5px] font-medium text-fg-1">
+                {lang === "es" ? "Sin leads activos" : "No active leads"}
+              </div>
+              <div className="text-[12px] text-fg-2">
+                {lang === "es" ? "Los leads aparecerán aquí ordenados por score." : "Leads will appear here ordered by score."}
+              </div>
+            </div>
+          )}
           {ranking.map((d, i) => (
             <div
               key={d.id}

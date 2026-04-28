@@ -48,7 +48,17 @@ export default function DashboardPage() {
         <div className="grid grid-cols-[1.3fr_1fr] gap-6 max-[1100px]:grid-cols-1">
           <Panel title={lang === "es" ? "Embudo por etapa" : "Funnel by stage"}>
             <div>
-              {bystage.map((row) => (
+              {bystage.every(row => row.count === 0) ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center gap-2">
+                  <div className="text-[32px] opacity-20">📈</div>
+                  <div className="text-[13.5px] font-medium text-fg-1">
+                    {lang === "es" ? "Sin datos de pipeline aún" : "No pipeline data yet"}
+                  </div>
+                  <div className="text-[12px] text-fg-2">
+                    {lang === "es" ? "Añade leads al pipeline para ver el embudo." : "Add leads to the pipeline to see the funnel."}
+                  </div>
+                </div>
+              ) : bystage.map((row) => (
                 <div key={row.stage} className="flex items-center gap-3 px-[18px] py-2.5 border-b border-border last:border-b-0">
                   <span className="w-[120px] text-fg-1 text-[13px]">
                     {lang === "es" ? STAGE_META[row.stage].labelEs : STAGE_META[row.stage].labelEn}
