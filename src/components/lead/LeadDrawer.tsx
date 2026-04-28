@@ -251,7 +251,14 @@ export function LeadDrawer() {
             </div>
           )}
 
-          {tab === "conversation" && <ConversationTab dealId={deal.id} deal={deal} />}
+          {tab === "conversation" && (
+            <ConversationTab
+              dealId={deal.id}
+              deal={deal}
+              onOpenEmail={() => setEmailOpen(true)}
+              onOpenWhatsApp={() => setWaOpen(true)}
+            />
+          )}
 
           {tab === "problems" && (
             <div className="p-6">
@@ -289,15 +296,74 @@ export function LeadDrawer() {
   );
 }
 
-function ConversationTab({ dealId, deal }: { dealId: string; deal: { contact?: { email?: string | null; phone?: string | null; name?: string } | null; company?: { name?: string } | null } }) {
+function ConversationTab({
+  dealId,
+  deal,
+  onOpenEmail,
+  onOpenWhatsApp,
+}: {
+  dealId: string;
+  deal: { contact?: { email?: string | null; phone?: string | null; name?: string } | null; company?: { name?: string } | null };
+  onOpenEmail: () => void;
+  onOpenWhatsApp: () => void;
+}) {
   const { data: events = [], isLoading } = useTimeline(dealId);
+  const { lang } = useT();
+
+  const hasEmail = !!deal.contact?.email;
+  const hasPhone = !!deal.contact?.phone;
 
   return (
-    <div className="p-6 flex flex-col gap-5">
-      <Composer dealId={dealId} contactEmail={deal.contact?.email ?? null} contactPhone={deal.contact?.phone ?? null} />
+    <div className="p-4 sm:p-6 flex flex-col gap-5">
+      {/* Quick send actions — open the real dialogs that send via Gmail SMTP / WhatsApp Web */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button
+          onClick={onOpenEmail}
+          disabled={!hasEmail}
+          className="flex items-center gap-3 p-4 rounded-xl border border-border bg-bg-2 hover:border-accent hover:bg-bg-3 disabled:opacity-50 disabled:cursor-not-allowed text-left transition-colors group"
+        >
+          <div className="w-10 h-10 rounded-lg bg-accent/10 text-accent grid place-items-center group-hover:bg-accent group-hover:text-accent-ink transition-colors">
+            <Send size={18} strokeWidth={1.5} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[13.5px] font-semibold">{lang === "es" ? "Enviar email" : "Send email"}</div>
+            <div className="text-[11.5px] text-fg-2 truncate">
+              {hasEmail
+                ? deal.contact?.email
+                : lang === "es" ? "Sin email — añade uno en Información" : "No email — add one in Info"}
+            </div>
+          </div>
+        </button>
+        <button
+          onClick={onOpenWhatsApp}
+          disabled={!hasPhone}
+          className="flex items-center gap-3 p-4 rounded-xl border border-border bg-bg-2 hover:border-[#25D366] hover:bg-bg-3 disabled:opacity-50 disabled:cursor-not-allowed text-left transition-colors group"
+        >
+          <div className="w-10 h-10 rounded-lg bg-[#25D366]/10 text-[#25D366] grid place-items-center group-hover:bg-[#25D366] group-hover:text-white transition-colors">
+            <MessageCircle size={18} strokeWidth={1.5} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[13.5px] font-semibold">{lang === "es" ? "Enviar WhatsApp" : "Send WhatsApp"}</div>
+            <div className="text-[11.5px] text-fg-2 truncate">
+              {hasPhone
+                ? deal.contact?.phone
+                : lang === "es" ? "Sin teléfono — añade uno en Información" : "No phone — add one in Info"}
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {/* Manual log composer (records without sending — useful for documenting calls / in-person meetings) */}
+      <div>
+        <div className="text-[10.5px] font-semibold text-fg-2 uppercase tracking-[0.1em] mb-2">
+          {lang === "es" ? "Anotar interacción manual" : "Log manual interaction"}
+        </div>
+        <Composer dealId={dealId} contactEmail={deal.contact?.email ?? null} contactPhone={deal.contact?.phone ?? null} />
+      </div>
+
       <div>
         <div className="text-[10.5px] font-semibold text-fg-2 uppercase tracking-[0.1em] mb-3">
-          Historial
+          {lang === "es" ? "Historial" : "History"}
         </div>
         {isLoading && <div className="text-fg-2 text-sm">Cargando…</div>}
         <TimelineList events={events} />
