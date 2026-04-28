@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useTasks, useToggleTask, useCreateTask, useDeleteTask } from "@/lib/queries/tasks";
 import { useT } from "@/lib/useT";
 import { useUI } from "@/store/ui";
@@ -73,11 +74,35 @@ export default function TareasPage() {
           </button>
         </div>
 
-        {isLoading && <div className="text-fg-2">Cargando…</div>}
+        {isLoading && (
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-[18px] py-2.5 border-b border-border">
+                <Skeleton className="w-[18px] h-[18px] rounded-[5px] shrink-0" />
+                <div className="flex-1 flex flex-col gap-1">
+                  <Skeleton className="h-3.5 w-2/3" />
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
+                <Skeleton className="h-5 w-16 rounded-md shrink-0" />
+              </div>
+            ))}
+          </div>
+        )}
         {!isLoading && (
           <div className="bg-bg-1 border border-border rounded-[14px] overflow-hidden">
             {filtered.length === 0 ? (
-              <div className="p-8 text-center text-fg-2">{t("empty_title")}</div>
+              <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
+                <div className="text-[40px] opacity-20">✅</div>
+                <div className="text-[14px] font-medium text-fg-1">
+                  {filter === "done"
+                    ? (lang === "es" ? "Sin tareas completadas" : "No completed tasks")
+                    : filter === "today"
+                    ? (lang === "es" ? "Sin tareas para hoy 🎉" : "No tasks for today 🎉")
+                    : filter === "overdue"
+                    ? (lang === "es" ? "Sin tareas vencidas, excelente" : "No overdue tasks, great job")
+                    : (lang === "es" ? "Sin tareas en este filtro" : "No tasks in this filter")}
+                </div>
+              </div>
             ) : filtered.map((task) => (
               <div key={task.id} className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-b-0 hover:bg-bg-2 group">
                 <button

@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
+import { Skeleton } from "@/components/ui/Skeleton";
 import {
   DndContext, DragOverlay, PointerSensor, KeyboardSensor, TouchSensor, useSensor, useSensors,
   closestCenter, type DragEndEvent, type DragStartEvent,
@@ -87,7 +88,36 @@ export function KanbanBoard() {
   };
 
   if (isLoading) {
-    return <div className="flex-1 grid place-items-center text-fg-2 text-sm">Cargando pipeline…</div>;
+    return (
+      <div className="flex-1 overflow-x-auto">
+        <div className="flex gap-3 p-4 min-w-max h-full">
+          {Array.from({ length: 6 }).map((_, col) => (
+            <div key={col} className="w-[260px] flex flex-col gap-2">
+              <div className="flex items-center justify-between px-2 py-1.5 mb-1">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-3 w-10" />
+              </div>
+              {Array.from({ length: col % 2 === 0 ? 3 : 2 }).map((_, card) => (
+                <div key={card} className="bg-bg-1 border border-border rounded-[12px] p-3 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+                    <div className="flex-1 flex flex-col gap-1">
+                      <Skeleton className="h-3.5 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <Skeleton className="h-5 w-14 rounded-full" />
+                    <Skeleton className="h-5 w-10 rounded-full" />
+                  </div>
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

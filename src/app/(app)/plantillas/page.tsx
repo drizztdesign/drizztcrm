@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState, useEffect } from "react";
 import { Topbar } from "@/components/layout/Topbar";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useTemplates, useUpdateTemplate, useCreateTemplate, useDeleteTemplate } from "@/lib/queries/templates";
 import { useT } from "@/lib/useT";
 import { useUI } from "@/store/ui";
@@ -155,7 +156,16 @@ export default function PlantillasPage() {
             {lang === "es" ? "Nueva plantilla" : "New template"}
           </button>
           <div className="border-t border-border">
-            {isLoading && <div className="p-4 text-fg-2 text-sm">Cargando…</div>}
+            {isLoading && (
+              <div className="flex flex-col gap-0">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="px-4 py-3 border-b border-border flex flex-col gap-1.5">
+                    <Skeleton className="h-3.5 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                ))}
+              </div>
+            )}
             {filtered.map((tpl) => {
               const Icon = CHANNEL_ICON[tpl.channel] ?? MessageCircle;
               const isActive = active?.id === tpl.id && !creating;
@@ -168,11 +178,20 @@ export default function PlantillasPage() {
                     isActive && "bg-bg-2 border-l-2 border-l-accent pl-[10px]"
                   )}
                 >
-                  <div className="text-[13px] font-medium mb-1">{tpl.title}</div>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <div className="text-[13px] font-medium">{tpl.title}</div>
+                    <span className={cn(
+                      "text-[9.5px] font-medium px-1 py-px rounded uppercase tracking-[0.08em]",
+                      tpl.channel === "whatsapp" ? "bg-green-500/15 text-green-400" :
+                      tpl.channel === "email"    ? "bg-blue-500/15 text-blue-400" :
+                      tpl.channel === "instagram"? "bg-pink-500/15 text-pink-400" :
+                                                   "bg-blue-800/15 text-blue-300"
+                    )}>
+                      {tpl.channel}
+                    </span>
+                  </div>
                   <div className="text-[11px] text-fg-2 flex gap-1.5 items-center">
                     <Icon size={11} strokeWidth={1.5} />
-                    <span className="capitalize">{tpl.channel}</span>
-                    <span className="text-fg-3">·</span>
                     <span>{tpl.stage}</span>
                   </div>
                 </button>

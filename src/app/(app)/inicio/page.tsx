@@ -1,5 +1,6 @@
 "use client";
 import { Topbar } from "@/components/layout/Topbar";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useDeals } from "@/lib/queries/deals";
 import { useTasks, useToggleTask } from "@/lib/queries/tasks";
 import { useAllTimeline } from "@/lib/queries/timeline";
@@ -22,7 +23,44 @@ export default function InicioPage() {
     return (
       <>
         <Topbar title={t("nav_home")} />
-        <div className="flex-1 grid place-items-center text-fg-2 text-sm">Cargando…</div>
+        <div className="flex-1 overflow-auto p-4 sm:p-[28px_32px] max-w-[1400px] mx-auto w-full">
+          <div className="flex flex-col gap-2 mb-6">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-80" />
+          </div>
+          <div className="flex gap-2.5 flex-wrap mb-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-bg-1 border border-border rounded-xl px-[14px] py-2.5 min-w-[170px] flex-1 max-w-[260px]">
+                <Skeleton className="h-2.5 w-20 mb-2" />
+                <Skeleton className="h-6 w-28" />
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-[1.2fr_1fr] gap-6 max-[1100px]:grid-cols-1">
+            {Array.from({ length: 2 }).map((_, col) => (
+              <div key={col} className="flex flex-col gap-5">
+                {Array.from({ length: 2 }).map((_, panel) => (
+                  <div key={panel} className="bg-bg-1 border border-border rounded-[14px] overflow-hidden">
+                    <div className="px-[18px] py-3.5 border-b border-border">
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                    <div className="py-2">
+                      {Array.from({ length: 3 }).map((_, row) => (
+                        <div key={row} className="flex items-center gap-3 px-[18px] py-2.5 border-b border-border last:border-b-0">
+                          <Skeleton className="w-6 h-6 rounded-lg shrink-0" />
+                          <div className="flex-1 flex flex-col gap-1">
+                            <Skeleton className="h-3.5 w-3/4" />
+                            <Skeleton className="h-3 w-1/2" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
       </>
     );
   }
@@ -42,7 +80,11 @@ export default function InicioPage() {
         <div className="flex items-end justify-between mb-5 gap-6 flex-wrap">
           <div>
             <h2 className="m-0 text-[28px] font-semibold -tracking-[0.02em]">
-              {t("home_hello")}, <b className="text-accent font-semibold">Drizzt</b>.
+              {(() => {
+                const h = new Date().getHours();
+                if (lang === "es") return h < 12 ? "Buenos días" : h < 20 ? "Buenas tardes" : "Buenas noches";
+                return h < 12 ? "Good morning" : h < 20 ? "Good afternoon" : "Good evening";
+              })()}, <b className="text-accent font-semibold">Drizzt</b>.
             </h2>
             <div className="text-fg-2 text-[13.5px] mt-1">
               {t("home_hello_sub", { n: todayTasks.length, hot: hotLeads.length })}

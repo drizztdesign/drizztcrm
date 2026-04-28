@@ -13,6 +13,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [showPwd, setShowPwd] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +60,27 @@ export default function SignupPage() {
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-[11px] text-fg-2 uppercase tracking-[0.1em]">{t("auth_password")}</span>
-            <input required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} type="password" className="h-10 rounded-lg bg-bg-2 border border-border px-3 text-[13.5px] outline-none focus:border-accent" />
+            <div className="relative">
+              <input
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type={showPwd ? "text" : "password"}
+                className="h-10 w-full rounded-lg bg-bg-2 border border-border px-3 pr-9 text-[13.5px] outline-none focus:border-accent transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd(!showPwd)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-fg-3 hover:text-fg-1"
+              >
+                {showPwd ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                )}
+              </button>
+            </div>
           </label>
           {error && <div className="text-[12px] text-danger">{error}</div>}
           {info && <div className="text-[12px] text-ok">{info}</div>}

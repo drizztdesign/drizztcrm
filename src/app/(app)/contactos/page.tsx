@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { useContacts } from "@/lib/queries/contacts";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useT } from "@/lib/useT";
 import { useUI } from "@/store/ui";
 import { avatarGradient, mailtoLink, whatsappLink } from "@/lib/format";
@@ -55,7 +56,28 @@ export default function ContactosPage() {
         ))}
       </div>
       <div className="flex-1 overflow-auto p-3 sm:p-6">
-        {isLoading && <div className="text-fg-2 text-sm">Cargando…</div>}
+        {isLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-bg-1 border border-border rounded-[14px] p-4 flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <Skeleton className="h-3.5 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-2/3" />
+                <div className="flex gap-2 mt-1">
+                  <Skeleton className="h-7 w-7 rounded-lg" />
+                  <Skeleton className="h-7 w-7 rounded-lg" />
+                  <Skeleton className="h-7 w-7 rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         {!isLoading && (
           <div className="grid grid-cols-3 max-[1200px]:grid-cols-2 max-[800px]:grid-cols-1 gap-3.5">
             {filtered.map((c) => (
@@ -101,7 +123,19 @@ export default function ContactosPage() {
                 </button>
               </div>
             ))}
-            {!filtered.length && <div className="col-span-full text-fg-2 text-center py-10">{t("empty_title")}</div>}
+            {!filtered.length && (
+              <div className="col-span-full flex flex-col items-center justify-center py-16 text-center gap-2">
+                <div className="text-[40px] opacity-20">👤</div>
+                <div className="text-[14px] font-medium text-fg-1">
+                  {search ? (lang === "es" ? "Sin resultados" : "No results") : (lang === "es" ? "Sin contactos aún" : "No contacts yet")}
+                </div>
+                <div className="text-[12.5px] text-fg-2">
+                  {search
+                    ? (lang === "es" ? `Nada coincide con "${search}"` : `Nothing matches "${search}"`)
+                    : (lang === "es" ? "Los contactos se crean al añadir un lead en el pipeline." : "Contacts are created when you add a lead in the pipeline.")}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

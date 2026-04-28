@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Topbar } from "@/components/layout/Topbar";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useCompanies } from "@/lib/queries/contacts";
 import { useDeals } from "@/lib/queries/deals";
 import { useT } from "@/lib/useT";
@@ -47,7 +48,21 @@ export default function EmpresasPage() {
     <>
       <Topbar title={t("nav_companies")} sub={`${companies.length} ${lang === "es" ? "empresas" : "companies"}`} />
       <div className="flex-1 overflow-auto p-3 sm:p-6 max-w-[1400px] mx-auto w-full">
-        {isLoading && <div className="text-fg-2 text-sm">Cargando…</div>}
+        {isLoading && (
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-bg-1 border border-border rounded-[12px] p-4 flex items-center gap-4">
+                <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <Skeleton className="h-3.5 w-1/3" />
+                  <Skeleton className="h-3 w-1/4" />
+                </div>
+                <Skeleton className="h-3 w-24 shrink-0" />
+                <Skeleton className="h-3 w-16 shrink-0" />
+              </div>
+            ))}
+          </div>
+        )}
         {!isLoading && (
           <>
             {/* Mobile cards */}
@@ -100,7 +115,19 @@ export default function EmpresasPage() {
                   </div>
                 );
               })}
-              {!filtered.length && <div className="text-center text-fg-2 py-10">{t("empty_title")}</div>}
+              {!filtered.length && (
+                <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
+                  <div className="text-[40px] opacity-20">🏢</div>
+                  <div className="text-[14px] font-medium text-fg-1">
+                    {search ? (lang === "es" ? "Sin resultados" : "No results") : (lang === "es" ? "Sin empresas aún" : "No companies yet")}
+                  </div>
+                  <div className="text-[12.5px] text-fg-2">
+                    {search
+                      ? (lang === "es" ? `Nada coincide con "${search}"` : `Nothing matches "${search}"`)
+                      : (lang === "es" ? "Las empresas se crean al añadir un lead con empresa." : "Companies are created when you add a lead with a company.")}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Desktop table */}
@@ -158,7 +185,21 @@ export default function EmpresasPage() {
                     );
                   })}
                   {!filtered.length && (
-                    <tr><td colSpan={7} className="py-10 text-center text-fg-2">{t("empty_title")}</td></tr>
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="text-[32px] opacity-20">🏢</div>
+                          <div className="text-[14px] font-medium text-fg-1">
+                            {search ? (lang === "es" ? "Sin resultados" : "No results") : (lang === "es" ? "Sin empresas aún" : "No companies yet")}
+                          </div>
+                          <div className="text-[12.5px] text-fg-2">
+                            {search
+                              ? (lang === "es" ? `Nada coincide con "${search}"` : `Nothing matches "${search}"`)
+                              : (lang === "es" ? "Las empresas se crean al añadir un lead con empresa." : "Companies are created when you add a lead with a company.")}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>

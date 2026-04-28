@@ -419,8 +419,23 @@ export default function BuscadorPage() {
           {loading && (
             <div className="p-8 text-center text-fg-2 text-sm">{lang === "es" ? "Consultando Google Maps…" : "Querying Google Maps…"}</div>
           )}
-          {!loading && filtered.length === 0 && results.length === 0 && (
-            <div className="p-8 text-center text-fg-2 text-sm">{lang === "es" ? "Busca un nicho para empezar" : "Search a niche to start"}</div>
+          {!loading && results.length === 0 && !error && (
+            <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+              <div className="text-[56px] opacity-20">🗺️</div>
+              <div className="text-[16px] font-semibold text-fg-1">
+                {lang === "es" ? "Busca nuevos clientes potenciales" : "Find new potential clients"}
+              </div>
+              <div className="text-[13px] text-fg-2 max-w-[420px] leading-relaxed">
+                {lang === "es"
+                  ? "Introduce un nicho (ej: restaurantes, fontaneros, clínicas) y una ubicación para encontrar negocios locales sin presencia web y añadirlos como leads."
+                  : "Enter a niche (e.g. restaurants, plumbers, clinics) and a location to find local businesses without a web presence and add them as leads."}
+              </div>
+              <div className="flex gap-2 text-[11.5px] text-fg-3">
+                <span className="bg-bg-2 border border-border rounded-md px-2.5 py-1">🏗️ Reformas</span>
+                <span className="bg-bg-2 border border-border rounded-md px-2.5 py-1">🍕 Restaurantes</span>
+                <span className="bg-bg-2 border border-border rounded-md px-2.5 py-1">🦷 Clínicas dentales</span>
+              </div>
+            </div>
           )}
           {!loading && filtered.length === 0 && results.length > 0 && (
             <div className="p-8 text-center text-fg-2 text-sm">{lang === "es" ? "Sin resultados con este filtro" : "No results in this filter"}</div>

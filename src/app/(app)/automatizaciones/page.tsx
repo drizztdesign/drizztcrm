@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { useAutomations, useToggleAutomation, useRunMyAutomations } from "@/lib/queries/templates";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useT } from "@/lib/useT";
 import { useUI } from "@/store/ui";
 import { cn } from "@/lib/cn";
@@ -95,7 +96,14 @@ export default function AutomatizacionesPage() {
           disabled={run.isPending}
           className="inline-flex items-center gap-1.5 px-3 h-9 rounded-md bg-bg-2 border border-border text-[12.5px] font-medium hover:border-border-strong disabled:opacity-60"
         >
-          <Play size={13} strokeWidth={1.8} />
+          {run.isPending ? (
+            <svg className="animate-spin w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+          ) : (
+            <Play size={13} strokeWidth={1.8} />
+          )}
           {run.isPending ? (lang === "es" ? "Ejecutando…" : "Running…") : (lang === "es" ? "Ejecutar ahora" : "Run now")}
         </button>
         <span className="text-[11px] text-fg-3 ml-auto">
@@ -104,7 +112,22 @@ export default function AutomatizacionesPage() {
       </div>
 
       <div className="flex-1 overflow-auto p-3 sm:p-6 max-w-[900px] mx-auto w-full">
-        {isLoading && <div className="text-fg-2">Cargando…</div>}
+        {isLoading && (
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-bg-1 border border-border rounded-[12px] p-4 flex items-center gap-4">
+                <Skeleton className="w-8 h-5 rounded-full shrink-0" />
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <Skeleton className="h-3.5 w-1/3" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <Skeleton className="h-3 w-20 shrink-0" />
+                <Skeleton className="h-3 w-20 shrink-0" />
+                <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex flex-col gap-2.5">
           {autos.map((a) => (
             <div key={a.id} className="bg-bg-1 border border-border rounded-xl p-4 flex items-start gap-3.5 group">
@@ -124,9 +147,18 @@ export default function AutomatizacionesPage() {
                   <b className="block text-fg-0 text-[14px] font-semibold tabular">{(a.stats?.fires ?? 0)}</b>
                   {lang === "es" ? "ejecuciones" : "runs"}
                 </div>
-                <div className="text-[10px] text-fg-3 mono">
-                  {lang === "es" ? "última: " : "last: "}{fmtRelative(a.last_run_at)}
-                </div>
+                {(() => {
+                  const rel = fmtRelative(a.last_run_at);
+                  const isRecent = a.last_run_at && (Date.now() - new Date(a.last_run_at).getTime()) < 60 * 60 * 1000;
+                  return (
+                    <div className={cn(
+                      "text-[10px] mono",
+                      isRecent ? "text-accent font-medium" : "text-fg-3"
+                    )}>
+                      {lang === "es" ? "última: " : "last: "}{rel}
+                    </div>
+                  );
+                })()}
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <button
@@ -145,8 +177,23 @@ export default function AutomatizacionesPage() {
             </div>
           ))}
           {!isLoading && autos.length === 0 && (
-            <div className="text-center text-fg-2 py-10">
-              {lang === "es" ? "Sin automatizaciones. Crea la primera." : "No automations yet. Create your first one."}
+            <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
+              <div className="text-[48px] opacity-20">⚡</div>
+              <div className="text-[14px] font-medium text-fg-1">
+                {lang === "es" ? "Sin automatizaciones" : "No automations yet"}
+              </div>
+              <div className="text-[12.5px] text-fg-2 max-w-[300px]">
+                {lang === "es"
+                  ? "Las automatizaciones ejecutan acciones en tus leads automáticamente según reglas que tú defines."
+                  : "Automations run actions on your leads automatically based on rules you define."}
+              </div>
+              <button
+                onClick={() => setCreating(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent text-accent-ink text-[12.5px] font-semibold hover:opacity-90"
+              >
+                <Plus size={13} />
+                {lang === "es" ? "Crear primera automatización" : "Create first automation"}
+              </button>
             </div>
           )}
         </div>
