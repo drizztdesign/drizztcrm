@@ -2,7 +2,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { DealWithRelations } from "@/lib/supabase/types";
-import { TEMP_META, PROJECT_META, SOURCE_META, probabilityFor, dealValue } from "@/lib/domain";
+import { PROJECT_META, SOURCE_META, probabilityFor, dealValue } from "@/lib/domain";
 import { fmtEuro, avatarGradient, daysBetween } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useUI } from "@/store/ui";
