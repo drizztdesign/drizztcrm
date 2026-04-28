@@ -115,7 +115,19 @@ export default function EmpresasPage() {
                   </div>
                 );
               })}
-              {!filtered.length && <div className="text-center text-fg-2 py-10">{t("empty_title")}</div>}
+              {!filtered.length && (
+                <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
+                  <div className="text-[40px] opacity-20">🏢</div>
+                  <div className="text-[14px] font-medium text-fg-1">
+                    {search ? (lang === "es" ? "Sin resultados" : "No results") : (lang === "es" ? "Sin empresas aún" : "No companies yet")}
+                  </div>
+                  <div className="text-[12.5px] text-fg-2">
+                    {search
+                      ? (lang === "es" ? `Nada coincide con "${search}"` : `Nothing matches "${search}"`)
+                      : (lang === "es" ? "Las empresas se crean al añadir un lead con empresa." : "Companies are created when you add a lead with a company.")}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Desktop table */}
@@ -173,7 +185,21 @@ export default function EmpresasPage() {
                     );
                   })}
                   {!filtered.length && (
-                    <tr><td colSpan={7} className="py-10 text-center text-fg-2">{t("empty_title")}</td></tr>
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="text-[32px] opacity-20">🏢</div>
+                          <div className="text-[14px] font-medium text-fg-1">
+                            {search ? (lang === "es" ? "Sin resultados" : "No results") : (lang === "es" ? "Sin empresas aún" : "No companies yet")}
+                          </div>
+                          <div className="text-[12.5px] text-fg-2">
+                            {search
+                              ? (lang === "es" ? `Nada coincide con "${search}"` : `Nothing matches "${search}"`)
+                              : (lang === "es" ? "Las empresas se crean al añadir un lead con empresa." : "Companies are created when you add a lead with a company.")}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>

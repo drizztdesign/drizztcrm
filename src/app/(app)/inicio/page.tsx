@@ -80,7 +80,11 @@ export default function InicioPage() {
         <div className="flex items-end justify-between mb-5 gap-6 flex-wrap">
           <div>
             <h2 className="m-0 text-[28px] font-semibold -tracking-[0.02em]">
-              {t("home_hello")}, <b className="text-accent font-semibold">Drizzt</b>.
+              {(() => {
+                const h = new Date().getHours();
+                if (lang === "es") return h < 12 ? "Buenos días" : h < 20 ? "Buenas tardes" : "Buenas noches";
+                return h < 12 ? "Good morning" : h < 20 ? "Good afternoon" : "Good evening";
+              })()}, <b className="text-accent font-semibold">Drizzt</b>.
             </h2>
             <div className="text-fg-2 text-[13.5px] mt-1">
               {t("home_hello_sub", { n: todayTasks.length, hot: hotLeads.length })}

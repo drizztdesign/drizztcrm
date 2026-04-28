@@ -60,6 +60,19 @@ export default function ActividadesPage() {
             ))}
           </div>
         )}
+        {!isLoading && filtered.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="text-[40px] mb-4 opacity-30">📭</div>
+            <div className="text-[14px] font-medium text-fg-1 mb-1">
+              {lang === "es" ? "Sin actividad" : "No activity"}
+            </div>
+            <div className="text-[12.5px] text-fg-2">
+              {filter === "all"
+                ? (lang === "es" ? "Las interacciones con tus leads aparecerán aquí." : "Interactions with your leads will appear here.")
+                : (lang === "es" ? `Sin actividad de tipo "${filter}" todavía.` : `No "${filter}" activity yet.`)}
+            </div>
+          </div>
+        )}
         {!isLoading && <TimelineList events={filtered} />}
       </div>
     </>

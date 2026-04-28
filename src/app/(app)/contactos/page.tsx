@@ -123,7 +123,19 @@ export default function ContactosPage() {
                 </button>
               </div>
             ))}
-            {!filtered.length && <div className="col-span-full text-fg-2 text-center py-10">{t("empty_title")}</div>}
+            {!filtered.length && (
+              <div className="col-span-full flex flex-col items-center justify-center py-16 text-center gap-2">
+                <div className="text-[40px] opacity-20">👤</div>
+                <div className="text-[14px] font-medium text-fg-1">
+                  {search ? (lang === "es" ? "Sin resultados" : "No results") : (lang === "es" ? "Sin contactos aún" : "No contacts yet")}
+                </div>
+                <div className="text-[12.5px] text-fg-2">
+                  {search
+                    ? (lang === "es" ? `Nada coincide con "${search}"` : `Nothing matches "${search}"`)
+                    : (lang === "es" ? "Los contactos se crean al añadir un lead en el pipeline." : "Contacts are created when you add a lead in the pipeline.")}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -91,7 +91,18 @@ export default function TareasPage() {
         {!isLoading && (
           <div className="bg-bg-1 border border-border rounded-[14px] overflow-hidden">
             {filtered.length === 0 ? (
-              <div className="p-8 text-center text-fg-2">{t("empty_title")}</div>
+              <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
+                <div className="text-[40px] opacity-20">✅</div>
+                <div className="text-[14px] font-medium text-fg-1">
+                  {filter === "done"
+                    ? (lang === "es" ? "Sin tareas completadas" : "No completed tasks")
+                    : filter === "today"
+                    ? (lang === "es" ? "Sin tareas para hoy 🎉" : "No tasks for today 🎉")
+                    : filter === "overdue"
+                    ? (lang === "es" ? "Sin tareas vencidas, excelente" : "No overdue tasks, great job")
+                    : (lang === "es" ? "Sin tareas en este filtro" : "No tasks in this filter")}
+                </div>
+              </div>
             ) : filtered.map((task) => (
               <div key={task.id} className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-b-0 hover:bg-bg-2 group">
                 <button
