@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState, useEffect } from "react";
 import { Topbar } from "@/components/layout/Topbar";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useTemplates, useUpdateTemplate, useCreateTemplate, useDeleteTemplate } from "@/lib/queries/templates";
 import { useT } from "@/lib/useT";
 import { useUI } from "@/store/ui";
@@ -155,7 +156,16 @@ export default function PlantillasPage() {
             {lang === "es" ? "Nueva plantilla" : "New template"}
           </button>
           <div className="border-t border-border">
-            {isLoading && <div className="p-4 text-fg-2 text-sm">Cargando…</div>}
+            {isLoading && (
+              <div className="flex flex-col gap-0">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="px-4 py-3 border-b border-border flex flex-col gap-1.5">
+                    <Skeleton className="h-3.5 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                ))}
+              </div>
+            )}
             {filtered.map((tpl) => {
               const Icon = CHANNEL_ICON[tpl.channel] ?? MessageCircle;
               const isActive = active?.id === tpl.id && !creating;

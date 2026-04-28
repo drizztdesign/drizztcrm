@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { X, Mail, Phone, Globe, MapPin, Tag, Trash2, Plus, Check, Send, MessageCircle } from "lucide-react";
 import { useUI } from "@/store/ui";
 import { useT } from "@/lib/useT";
@@ -365,7 +366,20 @@ function ConversationTab({
         <div className="text-[10.5px] font-semibold text-fg-2 uppercase tracking-[0.1em] mb-3">
           {lang === "es" ? "Historial" : "History"}
         </div>
-        {isLoading && <div className="text-fg-2 text-sm">Cargando…</div>}
+        {isLoading && (
+          <div className="flex flex-col gap-3 p-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex gap-2 items-start">
+                <Skeleton className="w-7 h-7 rounded-full shrink-0" />
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3.5 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <TimelineList events={events} />
       </div>
     </div>

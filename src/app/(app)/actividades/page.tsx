@@ -4,6 +4,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { useAllTimeline } from "@/lib/queries/timeline";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/cn";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { TimelineList } from "@/components/lead/TimelineList";
 import type { TimelineKind } from "@/lib/supabase/types";
 
@@ -45,7 +46,20 @@ export default function ActividadesPage() {
         ))}
       </div>
       <div className="flex-1 overflow-auto p-3 sm:p-6 max-w-[900px] mx-auto w-full">
-        {isLoading && <div className="text-fg-2">Cargando…</div>}
+        {isLoading && (
+          <div className="flex flex-col gap-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex gap-3 items-start py-3 border-b border-border">
+                <Skeleton className="w-7 h-7 rounded-full shrink-0" />
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <Skeleton className="h-3.5 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <Skeleton className="h-3 w-16 shrink-0" />
+              </div>
+            ))}
+          </div>
+        )}
         {!isLoading && <TimelineList events={filtered} />}
       </div>
     </>

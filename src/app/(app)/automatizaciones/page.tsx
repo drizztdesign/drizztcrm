@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { useAutomations, useToggleAutomation, useRunMyAutomations } from "@/lib/queries/templates";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useT } from "@/lib/useT";
 import { useUI } from "@/store/ui";
 import { cn } from "@/lib/cn";
@@ -104,7 +105,22 @@ export default function AutomatizacionesPage() {
       </div>
 
       <div className="flex-1 overflow-auto p-3 sm:p-6 max-w-[900px] mx-auto w-full">
-        {isLoading && <div className="text-fg-2">Cargando…</div>}
+        {isLoading && (
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-bg-1 border border-border rounded-[12px] p-4 flex items-center gap-4">
+                <Skeleton className="w-8 h-5 rounded-full shrink-0" />
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <Skeleton className="h-3.5 w-1/3" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <Skeleton className="h-3 w-20 shrink-0" />
+                <Skeleton className="h-3 w-20 shrink-0" />
+                <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex flex-col gap-2.5">
           {autos.map((a) => (
             <div key={a.id} className="bg-bg-1 border border-border rounded-xl p-4 flex items-start gap-3.5 group">

@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Topbar } from "@/components/layout/Topbar";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useCompanies } from "@/lib/queries/contacts";
 import { useDeals } from "@/lib/queries/deals";
 import { useT } from "@/lib/useT";
@@ -47,7 +48,21 @@ export default function EmpresasPage() {
     <>
       <Topbar title={t("nav_companies")} sub={`${companies.length} ${lang === "es" ? "empresas" : "companies"}`} />
       <div className="flex-1 overflow-auto p-3 sm:p-6 max-w-[1400px] mx-auto w-full">
-        {isLoading && <div className="text-fg-2 text-sm">Cargando…</div>}
+        {isLoading && (
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-bg-1 border border-border rounded-[12px] p-4 flex items-center gap-4">
+                <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <Skeleton className="h-3.5 w-1/3" />
+                  <Skeleton className="h-3 w-1/4" />
+                </div>
+                <Skeleton className="h-3 w-24 shrink-0" />
+                <Skeleton className="h-3 w-16 shrink-0" />
+              </div>
+            ))}
+          </div>
+        )}
         {!isLoading && (
           <>
             {/* Mobile cards */}
