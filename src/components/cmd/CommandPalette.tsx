@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Briefcase, Building2, Users, Inbox } from "lucide-react";
+import { Search, Briefcase, Building2, Users, Inbox, Zap } from "lucide-react";
 import { useUI } from "@/store/ui";
 import { useDeals } from "@/lib/queries/deals";
 import { useContacts, useCompanies } from "@/lib/queries/contacts";
@@ -13,13 +13,15 @@ type Result =
   | { kind: "deal"; id: string; title: string; sub: string; dealId: string }
   | { kind: "company"; id: string; title: string; sub: string; name: string }
   | { kind: "contact"; id: string; title: string; sub: string; email: string }
-  | { kind: "task"; id: string; title: string; sub: string; dealId: string | null };
+  | { kind: "task"; id: string; title: string; sub: string; dealId: string | null }
+  | { kind: "action"; id: string; title: string; sub: string; href: string };
 
 const ICON: Record<Result["kind"], React.ElementType> = {
   deal: Briefcase,
   company: Building2,
   contact: Users,
   task: Inbox,
+  action: Zap,
 };
 
 const SECTION_LABEL_ES: Record<Result["kind"], string> = {
@@ -27,12 +29,14 @@ const SECTION_LABEL_ES: Record<Result["kind"], string> = {
   company: "Empresas",
   contact: "Contactos",
   task: "Tareas",
+  action: "Acciones rápidas",
 };
 const SECTION_LABEL_EN: Record<Result["kind"], string> = {
   deal: "Leads",
   company: "Companies",
   contact: "Contacts",
   task: "Tasks",
+  action: "Quick actions",
 };
 
 export function CommandPalette() {
@@ -79,9 +83,11 @@ export function CommandPalette() {
 
   const results = useMemo<Result[]>(() => {
     if (!q.trim()) {
-      // Show top recent items per section
       return [
-        ...deals.slice(0, 5).map<Result>((d) => ({
+        { kind: "action" as const, id: "action-new-lead", title: lang === "es" ? "Nuevo lead" : "New lead", sub: lang === "es" ? "Abrir formulario de nuevo lead" : "Open new lead form", href: "new-lead" },
+        { kind: "action" as const, id: "action-pipeline", title: lang === "es" ? "Ir al Pipeline" : "Go to Pipeline", sub: lang === "es" ? "Ver todos los leads en Kanban" : "View all leads in Kanban", href: "/pipeline" },
+        { kind: "action" as const, id: "action-dashboard", title: lang === "es" ? "Ir al Dashboard" : "Go to Dashboard", sub: lang === "es" ? "Métricas del negocio" : "Business metrics", href: "/dashboard" },
+        ...deals.slice(0, 4).map<Result>((d) => ({
           kind: "deal",
           id: `deal-${d.id}`,
           title: d.company?.name ?? d.title,
@@ -151,7 +157,7 @@ export function CommandPalette() {
     }
 
     return out;
-  }, [q, deals, companies, contacts, tasks]);
+  }, [q, deals, companies, contacts, tasks, lang]);
 
   // Keep active index in range
   useEffect(() => {
@@ -159,17 +165,29 @@ export function CommandPalette() {
   }, [results.length, active]);
 
   const select = (r: Result) => {
-    setOpen(false);
     if (r.kind === "deal") {
+      setOpen(false);
       openDeal(r.dealId);
     } else if (r.kind === "company") {
       setSearch(r.name);
       router.push("/pipeline");
+      setOpen(false);
     } else if (r.kind === "contact") {
       router.push("/contactos");
+      setOpen(false);
     } else if (r.kind === "task") {
       if (r.dealId) openDeal(r.dealId);
       else router.push("/tareas");
+      setOpen(false);
+    } else if (r.kind === "action") {
+      if (r.href === "new-lead") {
+        setOpen(false);
+        // dispatch a custom event to open the new lead dialog
+        window.dispatchEvent(new CustomEvent("crm:new-lead"));
+      } else {
+        router.push(r.href);
+        setOpen(false);
+      }
     }
   };
 
@@ -194,7 +212,7 @@ export function CommandPalette() {
       (acc[r.kind] ||= []).push(r);
       return acc;
     },
-    { deal: [], company: [], contact: [], task: [] }
+    { deal: [], company: [], contact: [], task: [], action: [] }
   );
   const flat = results;
 
