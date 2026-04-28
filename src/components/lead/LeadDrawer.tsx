@@ -26,6 +26,8 @@ export function LeadDrawer() {
   const close = useUI((s) => s.closeDeal);
   const { t, lang } = useT();
   const { data: deal } = useDeal(id);
+  const { data: allProposals = [] } = useProposals();
+  const proposalCount = allProposals.filter((p) => p.deal_id === id).length;
   const [tab, setTab] = useState<Tab>("summary");
   const [emailOpen, setEmailOpen] = useState(false);
   const [waOpen, setWaOpen] = useState(false);
@@ -173,7 +175,16 @@ export function LeadDrawer() {
               {x === "conversation" && t("tab_conversation")}
               {x === "problems" && t("tab_problems")}
               {x === "notes" && t("tab_notes")}
-              {x === "proposal" && t("tab_proposal")}
+              {x === "proposal" && (
+                <span className="flex items-center gap-1">
+                  {t("tab_proposal")}
+                  {proposalCount > 0 && (
+                    <span className="text-[9.5px] bg-accent/20 text-accent rounded-full px-1.5 py-px font-semibold">
+                      {proposalCount}
+                    </span>
+                  )}
+                </span>
+              )}
             </button>
           ))}
         </div>
