@@ -4,6 +4,7 @@ import { useDeals } from "@/lib/queries/deals";
 import { pipelineTotals, STAGE_ORDER, STAGE_META, SOURCE_META } from "@/lib/domain";
 import { fmtEuro } from "@/lib/format";
 import { useT } from "@/lib/useT";
+import { cn } from "@/lib/cn";
 import type { LeadSource } from "@/lib/supabase/types";
 
 export default function DashboardPage() {
@@ -38,10 +39,10 @@ export default function DashboardPage() {
       <Topbar title={t("nav_dashboard")} sub={lang === "es" ? "Salud del negocio · Drizzt Design" : "Business health · Drizzt Design"} />
       <div className="flex-1 overflow-auto p-4 sm:p-[28px_32px] max-w-[1400px] mx-auto w-full">
         <div className="grid grid-cols-4 gap-3 max-[1100px]:grid-cols-2 mb-6">
-          <Kpi label={t("kpi_pipeline")}     value={fmtEuro(totals.total, lang)} />
-          <Kpi label={t("kpi_weighted")}     value={fmtEuro(totals.weighted, lang)} accent />
-          <Kpi label={t("kpi_closed_month")} value={fmtEuro(totals.closedValue, lang)} />
-          <Kpi label={t("kpi_conversion")}   value={`${Math.round(totals.conversion * 100)}%`} />
+          <Kpi label={t("kpi_pipeline")}     value={fmtEuro(totals.total, lang)}                     trend={totals.total > 0 ? "up" : "neutral"} />
+          <Kpi label={t("kpi_weighted")}     value={fmtEuro(totals.weighted, lang)}   accent          trend={totals.weighted > 0 ? "up" : "neutral"} />
+          <Kpi label={t("kpi_closed_month")} value={fmtEuro(totals.closedValue, lang)}                trend={totals.closedValue > 0 ? "up" : "neutral"} />
+          <Kpi label={t("kpi_conversion")}   value={`${Math.round(totals.conversion * 100)}%`}        trend={totals.conversion > 0.2 ? "up" : totals.conversion > 0 ? "neutral" : "down"} />
         </div>
 
         <div className="grid grid-cols-[1.3fr_1fr] gap-6 max-[1100px]:grid-cols-1">
@@ -58,6 +59,9 @@ export default function DashboardPage() {
                       style={{ width: `${(row.count / maxCount) * 100}%` }}
                     />
                   </div>
+                  <span className="w-[35px] text-right text-fg-3 text-[11px] tabular">
+                    {maxCount > 0 ? `${Math.round((row.count / maxCount) * 100)}%` : "0%"}
+                  </span>
                   <span className="w-[80px] text-right text-fg-2 tabular text-[13px]">{row.count}</span>
                   <span className="w-[90px] text-right font-medium tabular text-[13px]">{fmtEuro(row.value, lang)}</span>
                 </div>
@@ -72,6 +76,7 @@ export default function DashboardPage() {
                   <th className="text-left py-2.5 px-[14px] border-b border-border bg-bg-1">Origen</th>
                   <th className="text-right py-2.5 px-[14px] border-b border-border bg-bg-1">Leads</th>
                   <th className="text-right py-2.5 px-[14px] border-b border-border bg-bg-1">Won</th>
+                  <th className="text-right py-2.5 px-[14px] border-b border-border bg-bg-1">Conv.</th>
                   <th className="text-right py-2.5 px-[14px] border-b border-border bg-bg-1">€</th>
                 </tr>
               </thead>
@@ -84,11 +89,19 @@ export default function DashboardPage() {
                     </td>
                     <td className="py-3 px-[14px] text-right text-fg-2 tabular">{s.count}</td>
                     <td className="py-3 px-[14px] text-right text-ok tabular">{s.won}</td>
+                    <td className="py-2.5 px-[14px] text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <div className="w-[40px] h-1.5 bg-bg-3 rounded-full overflow-hidden">
+                          <div className="h-full bg-accent rounded-full" style={{ width: `${Math.round(s.rate * 100)}%` }} />
+                        </div>
+                        <span className="tabular text-[11.5px] text-fg-2">{Math.round(s.rate * 100)}%</span>
+                      </div>
+                    </td>
                     <td className="py-3 px-[14px] text-right font-medium tabular">{fmtEuro(s.value, lang)}</td>
                   </tr>
                 ))}
                 {!sources.length && (
-                  <tr><td colSpan={4} className="py-8 text-center text-fg-2">{lang === "es" ? "Sin datos aún." : "No data yet."}</td></tr>
+                  <tr><td colSpan={5} className="py-8 text-center text-fg-2">{lang === "es" ? "Sin datos aún." : "No data yet."}</td></tr>
                 )}
               </tbody>
             </table>
@@ -99,11 +112,20 @@ export default function DashboardPage() {
   );
 }
 
-function Kpi({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+function Kpi({ label, value, accent, trend }: { label: string; value: string; accent?: boolean; trend?: "up" | "down" | "neutral" }) {
   return (
-    <div className="bg-bg-1 border border-border rounded-[14px] p-[16px_18px]">
-      <div className="text-[11px] text-fg-2 uppercase tracking-[0.1em] mb-1.5">{label}</div>
-      <div className={`text-[28px] font-semibold -tracking-[0.02em] tabular ${accent ? "text-accent" : ""}`}>{value}</div>
+    <div className="bg-bg-1 border border-border rounded-xl px-[14px] py-3 flex flex-col gap-1 relative overflow-hidden">
+      <div className="text-[10.5px] font-semibold text-fg-2 uppercase tracking-[0.1em]">{label}</div>
+      <div className={cn("text-[22px] font-semibold -tracking-[0.01em] tabular", accent && "text-accent")}>{value}</div>
+      {trend && (
+        <div className={cn(
+          "text-[10px] font-medium flex items-center gap-0.5",
+          trend === "up" ? "text-green-400" : trend === "down" ? "text-red-400" : "text-fg-3"
+        )}>
+          {trend === "up" ? "↑" : trend === "down" ? "↓" : "→"}
+          {trend === "up" ? (accent ? "pipeline activo" : "este mes") : trend === "down" ? "vs mes anterior" : "estable"}
+        </div>
+      )}
     </div>
   );
 }
