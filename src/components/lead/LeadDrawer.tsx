@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { X, Mail, Phone, Globe, MapPin, Tag, Trash2, Plus, Check, Send, MessageCircle } from "lucide-react";
+import { X, Mail, Phone, Globe, MapPin, Tag, Trash2, Plus, Check, Send, MessageCircle, FileText } from "lucide-react";
 import { useUI } from "@/store/ui";
 import { useT } from "@/lib/useT";
 import { useDeal, useUpdateDeal, useDeleteDeal } from "@/lib/queries/deals";
 import { useTimeline } from "@/lib/queries/timeline";
 import { useTasks, useCreateTask, useToggleTask, useDeleteTask } from "@/lib/queries/tasks";
+import { useProposals } from "@/lib/queries/proposals";
 import { EditTaskDialog } from "@/components/tasks/EditTaskDialog";
 import { SendEmailDialog } from "@/components/email/SendEmailDialog";
 import { SendWhatsAppDialog } from "@/components/whatsapp/SendWhatsAppDialog";
@@ -17,7 +18,7 @@ import { cn } from "@/lib/cn";
 import { Composer } from "./Composer";
 import { TimelineList } from "./TimelineList";
 
-const TABS = ["summary", "conversation", "problems", "notes"] as const;
+const TABS = ["summary", "conversation", "problems", "notes", "proposal"] as const;
 type Tab = typeof TABS[number];
 
 export function LeadDrawer() {
@@ -172,6 +173,7 @@ export function LeadDrawer() {
               {x === "conversation" && t("tab_conversation")}
               {x === "problems" && t("tab_problems")}
               {x === "notes" && t("tab_notes")}
+              {x === "proposal" && t("tab_proposal")}
             </button>
           ))}
         </div>
@@ -288,6 +290,10 @@ export function LeadDrawer() {
                 />
               </Panel>
             </div>
+          )}
+
+          {tab === "proposal" && deal && (
+            <ProposalTab dealId={deal.id} dealTitle={deal.company?.name ?? deal.title} lang={lang} />
           )}
         </div>
       </aside>
@@ -583,6 +589,76 @@ function EditableList({ items, placeholder, emptyText, onSave }: { items: string
           <Plus size={14} strokeWidth={2} />
         </button>
       </div>
+    </div>
+  );
+}
+
+function ProposalTab({ dealId, dealTitle, lang }: { dealId: string; dealTitle: string; lang: "es" | "en" }) {
+  const { data: proposals = [], isLoading } = useProposals();
+  const dealProposals = proposals.filter((p) => p.deal_id === dealId);
+
+  const STATUS_COLORS: Record<string, string> = {
+    draft:    "bg-bg-3 text-fg-2",
+    sent:     "bg-blue-500/15 text-blue-400",
+    signed:   "bg-green-500/15 text-green-400",
+    rejected: "bg-red-500/15 text-red-400",
+  };
+  const STATUS_LABELS_ES: Record<string, string> = { draft: "Borrador", sent: "Enviada", signed: "Firmada", rejected: "Rechazada" };
+  const STATUS_LABELS_EN: Record<string, string> = { draft: "Draft", sent: "Sent", signed: "Signed", rejected: "Rejected" };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 flex flex-col gap-3">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="bg-bg-2 border border-border rounded-xl p-4 flex flex-col gap-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/3" />
+            <Skeleton className="h-6 w-24 mt-1" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (dealProposals.length === 0) {
+    return (
+      <div className="p-6 flex flex-col items-center justify-center text-center gap-3 py-16">
+        <FileText size={32} className="text-fg-3 opacity-30" />
+        <div className="text-[13.5px] font-medium text-fg-1">
+          {lang === "es" ? "Sin propuestas guardadas" : "No saved proposals"}
+        </div>
+        <div className="text-[12px] text-fg-2">
+          {lang === "es"
+            ? `Crea una propuesta para ${dealTitle} en la sección Propuestas.`
+            : `Create a proposal for ${dealTitle} in the Proposals section.`}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 sm:p-6 flex flex-col gap-3">
+      <div className="text-[10.5px] font-semibold text-fg-2 uppercase tracking-[0.1em]">
+        {lang === "es" ? `${dealProposals.length} propuesta${dealProposals.length > 1 ? "s" : ""}` : `${dealProposals.length} proposal${dealProposals.length > 1 ? "s" : ""}`}
+      </div>
+      {dealProposals.map((p) => (
+        <div key={p.id} className="bg-bg-2 border border-border rounded-xl p-4 flex flex-col gap-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="text-[13.5px] font-medium leading-snug">{p.title}</div>
+            <span className={cn("text-[10.5px] px-1.5 py-0.5 rounded-md font-medium shrink-0 capitalize", STATUS_COLORS[p.status] ?? "bg-bg-3 text-fg-2")}>
+              {lang === "es" ? (STATUS_LABELS_ES[p.status] ?? p.status) : (STATUS_LABELS_EN[p.status] ?? p.status)}
+            </span>
+          </div>
+          <div className="text-[22px] font-semibold tabular -tracking-[0.01em]">
+            {p.grand_total.toLocaleString(lang === "es" ? "es-ES" : "en-US", { style: "currency", currency: "EUR", maximumFractionDigits: 0 })}
+          </div>
+          <div className="text-[11px] text-fg-3">
+            {new Date(p.created_at).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { day: "numeric", month: "short", year: "numeric" })}
+            {p.sent_at && ` · ${lang === "es" ? "Enviada" : "Sent"} ${new Date(p.sent_at).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { day: "numeric", month: "short" })}`}
+            {p.signed_at && ` · ${lang === "es" ? "Firmada" : "Signed"} ${new Date(p.signed_at).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { day: "numeric", month: "short" })}`}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
