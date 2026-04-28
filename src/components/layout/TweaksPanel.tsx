@@ -153,6 +153,16 @@ export function TweaksPanel() {
                 ? lang === "es" ? "Recalculando…" : "Recomputing…"
                 : lang === "es" ? "Recalcular scoring" : "Recompute scoring"}
             </button>
+            <button
+              onClick={() => {
+                qc.invalidateQueries();
+                show(lang === "es" ? "Datos actualizados" : "Data refreshed", "ok");
+              }}
+              className="w-full h-10 rounded-lg bg-bg-2 border border-border hover:border-border-strong text-[13px] font-medium flex items-center justify-center gap-2 mt-2"
+            >
+              <RefreshCw size={14} strokeWidth={1.5} />
+              {lang === "es" ? "Recargar todos los datos" : "Refresh all data"}
+            </button>
             <p className="text-[11px] text-fg-2 mt-2 leading-relaxed">
               {lang === "es"
                 ? "El scoring se recalcula solo al editar un lead. Usa este botón para reaplicar las reglas a todos tras cambiar pesos."
