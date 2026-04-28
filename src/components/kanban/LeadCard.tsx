@@ -59,7 +59,17 @@ export function LeadCard({ deal, overlay = false }: { deal: DealWithRelations; o
           <div className="text-[13.5px] font-semibold text-fg-0 truncate">{deal.company?.name ?? deal.title}</div>
           <div className="text-[11.5px] text-fg-2 truncate">{deal.contact?.name ?? "—"}</div>
         </div>
-        <span className={cn("dot ml-auto", TEMP_META[deal.temp].className)} />
+        <span className={cn(
+          "text-[10px] font-semibold px-1.5 py-px rounded-md ml-auto shrink-0",
+          deal.temp === "superhot" && "bg-red-500/20 text-red-400",
+          deal.temp === "hot"      && "bg-orange-500/20 text-orange-400",
+          deal.temp === "warm"     && "bg-yellow-500/20 text-yellow-400",
+          deal.temp === "cold"     && "bg-blue-500/15 text-blue-400",
+          deal.temp === "lost"     && "bg-fg-3/20 text-fg-3",
+        )}>
+          {deal.temp === "superhot" ? "🔥" : deal.temp === "hot" ? "🌶" : deal.temp === "warm" ? "☀" : deal.temp === "cold" ? "❄" : "🧊"}
+          {" "}{deal.temp}
+        </span>
       </div>
 
       <div className="flex flex-wrap gap-1 mb-[10px]">
@@ -78,6 +88,17 @@ export function LeadCard({ deal, overlay = false }: { deal: DealWithRelations; o
         </span>
       </div>
 
+      {/* Score bar */}
+      <div className="w-full h-1.5 bg-bg-3 rounded-full overflow-hidden mb-2">
+        <div
+          className={cn(
+            "h-full rounded-full transition-all",
+            deal.score >= 70 ? "bg-accent" : deal.score >= 40 ? "bg-yellow-400" : "bg-fg-3"
+          )}
+          style={{ width: `${Math.min(deal.score, 100)}%` }}
+        />
+      </div>
+
       <div className="flex items-baseline gap-2 mt-1.5">
         <span className="text-[18px] font-semibold -tracking-[0.01em] text-fg-0 tabular">
           {fmtEuro(value, lang)}
@@ -91,7 +112,10 @@ export function LeadCard({ deal, overlay = false }: { deal: DealWithRelations; o
         <div className={cn("flex-1 min-w-0 truncate", urgent ? "text-danger font-medium" : "text-fg-1")}>
           {deal.next_action ?? (lang === "es" ? "Sin próxima acción" : "No next action")}
         </div>
-        <span className={cn("tabular shrink-0", stalled && "text-warn")}>
+        <span className={cn(
+          "text-[10.5px] px-1.5 py-px rounded-md tabular shrink-0 font-medium",
+          stalled ? "bg-warn/20 text-warn" : "bg-bg-3 text-fg-3"
+        )}>
           {daysInStage}d
         </span>
       </div>

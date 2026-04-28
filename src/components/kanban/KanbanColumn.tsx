@@ -33,6 +33,14 @@ export function KanbanColumn({
         <span className="text-[10.5px] text-fg-2 bg-bg-2 border border-border rounded-md px-1.5 py-px tabular">
           {items.length}
         </span>
+        {(() => {
+          const hot = items.filter(d => d.temp === "superhot" || d.temp === "hot").length;
+          return hot > 0 ? (
+            <span className="text-[10px] text-orange-400 bg-orange-500/10 border border-orange-500/20 rounded-md px-1.5 py-px tabular">
+              🔥 {hot}
+            </span>
+          ) : null;
+        })()}
         <span className="ml-auto text-[10.5px] text-fg-2 tabular">{totalLabel}</span>
       </div>
       <div
