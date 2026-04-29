@@ -1,8 +1,17 @@
 "use client";
+import { useState } from "react";
 import { useDroppable } from "@dnd-kit/core";
+import { Send, Globe, MessageCircle } from "lucide-react";
 import type { LeadStage, DealWithRelations, Lang } from "@/lib/supabase/types";
-import { STAGE_META } from "@/lib/domain";
+import { STAGE_META, PROSPECTING_STAGES } from "@/lib/domain";
 import { cn } from "@/lib/cn";
+import { BulkProspectDialog } from "./BulkProspectDialog";
+
+const PROSPECT_ACTION: Record<string, { Icon: React.ElementType; labelEs: string; labelEn: string }> = {
+  prospecto_email: { Icon: Send,          labelEs: "Enviar emails",  labelEn: "Send emails" },
+  prospecto_web:   { Icon: Globe,         labelEs: "Abrir webs",     labelEn: "Open sites" },
+  prospecto_frio:  { Icon: MessageCircle, labelEs: "WhatsApp",       labelEn: "WhatsApp" },
+};
 
 export function KanbanColumn({
   stage,
@@ -17,6 +26,8 @@ export function KanbanColumn({
   totalLabel: string;
   children: React.ReactNode;
 }) {
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const action = PROSPECTING_STAGES.includes(stage) ? PROSPECT_ACTION[stage] : null;
   const { setNodeRef, isOver } = useDroppable({ id: stage });
   const meta = STAGE_META[stage];
 
@@ -42,7 +53,20 @@ export function KanbanColumn({
           ) : null;
         })()}
         <span className="ml-auto text-[10.5px] text-fg-2 tabular">{totalLabel}</span>
+        {action && items.length > 0 && (
+          <button
+            onClick={() => setBulkOpen(true)}
+            title={lang === "es" ? action.labelEs : action.labelEn}
+            className="ml-1 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-accent text-accent-ink text-[10px] font-semibold hover:brightness-105 shrink-0"
+          >
+            <action.Icon size={10} strokeWidth={2} />
+            {lang === "es" ? action.labelEs : action.labelEn}
+          </button>
+        )}
       </div>
+      {bulkOpen && (
+        <BulkProspectDialog stage={stage} items={items} onClose={() => setBulkOpen(false)} />
+      )}
       <div
         ref={setNodeRef}
         className={cn(
