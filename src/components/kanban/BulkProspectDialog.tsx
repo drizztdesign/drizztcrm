@@ -78,7 +78,7 @@ export function BulkProspectDialog({ stage, items, onClose }: Props) {
     setProgress(initial);
 
     for (const deal of actionable) {
-      const email = deal.contact?.email!;
+      const email = deal.contact?.email ?? "";
       const subject = fillTemplate(selectedTemplate.subject ?? selectedTemplate.title, deal);
       const body = fillTemplate(selectedTemplate.body, deal);
       try {
