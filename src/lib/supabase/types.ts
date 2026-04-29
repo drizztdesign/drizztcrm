@@ -1,7 +1,7 @@
 // Tipos de dominio — reflejan las columnas de la BBDD.
 // Los enums son equivalentes en TS a los del Postgres.
 
-export type LeadStage = "lead" | "contactado" | "interesado" | "reunion" | "propuesta" | "negociacion" | "cerrado" | "lost";
+export type LeadStage = "prospecto_email" | "prospecto_web" | "prospecto_frio" | "lead" | "contactado" | "interesado" | "reunion" | "propuesta" | "negociacion" | "cerrado" | "lost";
 export type PostStage = "desarrollo" | "revision" | "entregada" | "mantenimiento" | "finalizado" | "recurrente";
 export type LeadTemp = "superhot" | "hot" | "warm" | "cold" | "lost";
 export type PayState = "pendiente" | "senal" | "parcial" | "pagado" | "impagado";

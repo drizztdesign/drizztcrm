@@ -5,6 +5,7 @@ import { useT } from "@/lib/useT";
 import { useUI } from "@/store/ui";
 import { useCreateCompany, useCreateContact, useCompanies } from "@/lib/queries/contacts";
 import { useCreateDeal } from "@/lib/queries/deals";
+import type { LeadStage } from "@/lib/supabase/types";
 import { cn } from "@/lib/cn";
 import { Search, Globe, Phone, Star, Plus, Check, Download, Loader2, Mail } from "lucide-react";
 
@@ -256,12 +257,19 @@ export default function BuscadorPage() {
         role: "",
       });
 
+      // Segment into prospecting stage based on available contact data
+      const importStage: LeadStage = p.email
+        ? "prospecto_email"
+        : p.hasWeb
+        ? "prospecto_web"
+        : "prospecto_frio";
+
       // Create the deal
       const deal = await createDeal.mutateAsync({
         title: `${p.name} — ${niche}`,
         company_id: companyId,
         contact_id: contact.id,
-        stage: "lead",
+        stage: importStage,
         source: "google",
         project_type: "landing",
         pain: p.hasWeb ? "web_antigua" : "no_web",

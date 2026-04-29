@@ -10,6 +10,9 @@ import type {
 } from "@/lib/supabase/types";
 
 export const STAGE_ORDER: LeadStage[] = [
+  "prospecto_frio",
+  "prospecto_web",
+  "prospecto_email",
   "lead",
   "contactado",
   "interesado",
@@ -29,6 +32,12 @@ export const ACTIVE_STAGES: LeadStage[] = [
   "cerrado",
 ];
 
+export const PROSPECTING_STAGES: LeadStage[] = [
+  "prospecto_frio",
+  "prospecto_web",
+  "prospecto_email",
+];
+
 export const STAGE_META: Record<LeadStage, {
   labelEs: string;
   labelEn: string;
@@ -36,6 +45,9 @@ export const STAGE_META: Record<LeadStage, {
   hintEs: string;
   hintEn: string;
 }> = {
+  prospecto_email: { labelEs: "Con email",  labelEn: "Has email",    prob: 5, hintEs: "Importado con email — listo para contactar", hintEn: "Imported with email — ready to contact" },
+  prospecto_web:   { labelEs: "Sin email",  labelEn: "No email",     prob: 3, hintEs: "Tiene web pero sin email encontrado",        hintEn: "Has website but no email found" },
+  prospecto_frio:  { labelEs: "Sin web",    labelEn: "No website",   prob: 2, hintEs: "Sin web ni email — contacto frío",           hintEn: "No website or email — cold contact" },
   lead:        { labelEs: "Lead",        labelEn: "Lead",       prob: 10,  hintEs: "Captados, sin contactar",       hintEn: "Captured, uncontacted" },
   contactado:  { labelEs: "Contactado",  labelEn: "Contacted",  prob: 20,  hintEs: "Primer mensaje enviado",        hintEn: "First message sent" },
   interesado:  { labelEs: "Interesado",  labelEn: "Interested", prob: 35,  hintEs: "Respondió con interés",          hintEn: "Responded with interest" },
@@ -102,7 +114,9 @@ export function weightedValue(deal: Pick<Deal, "stage" | "prob_override" | "pric
 }
 
 export function pipelineTotals(deals: DealWithRelations[] | Deal[]) {
-  const active = (deals as Deal[]).filter((d) => d.stage !== "lost" && d.stage !== "cerrado");
+  const active = (deals as Deal[]).filter((d) =>
+    d.stage !== "lost" && d.stage !== "cerrado" && !PROSPECTING_STAGES.includes(d.stage)
+  );
   const total = active.reduce((a, d) => a + dealValue(d), 0);
   const weighted = active.reduce((a, d) => a + weightedValue(d), 0);
   const closedDeals = (deals as Deal[]).filter((d) => d.stage === "cerrado");
