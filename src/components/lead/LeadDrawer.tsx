@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { X, Mail, Phone, Globe, MapPin, Tag, Trash2, Plus, Check, Send, MessageCircle, FileText } from "lucide-react";
+import { X, Mail, Phone, Globe, MapPin, Tag, Trash2, Plus, Check, Send, MessageCircle, FileText, Layout } from "lucide-react";
 import { useUI } from "@/store/ui";
 import { useT } from "@/lib/useT";
 import { useDeal, useUpdateDeal, useDeleteDeal } from "@/lib/queries/deals";
@@ -17,8 +17,9 @@ import { fmtEuro, avatarGradient, daysBetween, mailtoLink, whatsappLink } from "
 import { cn } from "@/lib/cn";
 import { Composer } from "./Composer";
 import { TimelineList } from "./TimelineList";
+import { MockupTab } from "./MockupTab";
 
-const TABS = ["summary", "conversation", "problems", "notes", "proposal"] as const;
+const TABS = ["summary", "conversation", "problems", "notes", "proposal", "mockup"] as const;
 type Tab = typeof TABS[number];
 
 export function LeadDrawer() {
@@ -185,6 +186,12 @@ export function LeadDrawer() {
                   )}
                 </span>
               )}
+              {x === "mockup" && (
+                <span className="flex items-center gap-1">
+                  <Layout size={12} strokeWidth={1.5} />
+                  {t("tab_mockup")}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -305,6 +312,12 @@ export function LeadDrawer() {
 
           {tab === "proposal" && deal && (
             <ProposalTab dealId={deal.id} dealTitle={deal.company?.name ?? deal.title} lang={lang} />
+          )}
+
+          {tab === "mockup" && deal && (
+            <div className="p-4 sm:p-6">
+              <MockupTab deal={deal} />
+            </div>
           )}
         </div>
       </aside>

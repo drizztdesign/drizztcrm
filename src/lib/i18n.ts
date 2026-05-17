@@ -86,6 +86,7 @@ const es: Dict = {
   tab_problems: "Problemas",
   tab_history: "Historial",
   tab_notes: "Notas",
+  tab_mockup: "Modelo web",
 
   f_stage: "Etapa",
   f_value: "Valor",
@@ -228,6 +229,7 @@ const en: Dict = {
   tab_problems: "Problems",
   tab_history: "History",
   tab_notes: "Notes",
+  tab_mockup: "Web mockup",
 
   f_stage: "Stage",
   f_value: "Value",

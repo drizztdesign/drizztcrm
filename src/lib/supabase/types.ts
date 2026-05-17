@@ -156,6 +156,15 @@ export interface ScoringRule {
   created_at: string;
 }
 
+export interface DealMockup {
+  id: string;
+  owner_id: string;
+  deal_id: string;
+  html: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Proposal {
   id: string;
   owner_id: string;
