@@ -156,11 +156,16 @@ export interface ScoringRule {
   created_at: string;
 }
 
+export type MockupStatus = "pending" | "done" | "error";
+
 export interface DealMockup {
   id: string;
   owner_id: string;
   deal_id: string;
-  html: string;
+  html: string | null;
+  status: MockupStatus;
+  prompt: string | null;
+  error_msg: string | null;
   created_at: string;
   updated_at: string;
 }
