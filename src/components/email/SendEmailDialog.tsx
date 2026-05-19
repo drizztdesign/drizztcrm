@@ -40,7 +40,7 @@ export function SendEmailDialog({
     const t = emailTemplates.find((x) => x.id === id);
     if (!t) return;
     const vars: Record<string, string> = {
-      contacto: deal?.contact?.name ?? "",
+      contacto: deal?.contact?.name || deal?.company?.name || "",
       empresa: deal?.company?.name ?? "",
       web: deal?.company?.website ?? "",
       sector: deal?.company?.sector ?? "",

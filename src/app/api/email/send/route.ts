@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { createClient } from "@/lib/supabase/server";
-import { emailEnv, buildRefToken, refTokenInSubject, fillTemplate } from "@/lib/email/config";
+import { emailEnv, buildRefToken, refTokenInSubject, sanitizeSubject, fillTemplate } from "@/lib/email/config";
 
 export const runtime = "nodejs";
 
@@ -37,17 +37,47 @@ export async function POST(request: Request) {
   }
 
   // Fill placeholders if requested
-  const subject = body.vars ? fillTemplate(body.subject, body.vars) : body.subject;
+  const rawSubject = body.vars ? fillTemplate(body.subject, body.vars) : body.subject;
   const text = body.vars ? fillTemplate(body.body, body.vars) : body.body;
 
-  const refToken = buildRefToken();
-  const finalSubject = refTokenInSubject(subject, refToken);
+  // Strip Re:/Fwd: prefixes — they trigger spam filters on cold outreach
+  const cleanSubject = sanitizeSubject(rawSubject);
 
-  // Convert plain text to simple HTML preserving line breaks
-  const html = text
+  const refToken = buildRefToken();
+  const finalSubject = refTokenInSubject(cleanSubject, refToken);
+
+  // Build proper HTML email (improves deliverability significantly)
+  const bodyHtml = text
     .split("\n")
-    .map((l) => l.length === 0 ? "<br>" : `<p style="margin:0 0 8px 0">${escapeHtml(l)}</p>`)
+    .map((l) =>
+      l.length === 0
+        ? `<tr><td style="height:10px"></td></tr>`
+        : `<tr><td style="margin:0;padding:0 0 10px 0;font-size:15px;line-height:1.7;color:#1a1a1a">${escapeHtml(l)}</td></tr>`
+    )
     .join("");
+
+  const html = `<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>${escapeHtml(cleanSubject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#ffffff;font-family:Arial,Helvetica,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff">
+    <tr>
+      <td align="center" style="padding:32px 16px">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%">
+          <tbody>
+            ${bodyHtml}
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -59,10 +89,16 @@ export async function POST(request: Request) {
     const info = await transporter.sendMail({
       from: `"${env.fromName}" <${env.user}>`,
       to: body.to,
+      replyTo: `"${env.fromName}" <${env.user}>`,
       subject: finalSubject,
       text,
       html,
-      // Gmail SMTP returns a Message-ID header which we'll persist for threading
+      headers: {
+        "X-Mailer": "Drizzt CRM",
+        "X-Priority": "3",           // Normal priority (1=high triggers spam)
+        "Precedence": "bulk",
+        "X-CRM-Ref": refToken,       // Machine-readable ref (doesn't appear in subject visually)
+      },
     });
     messageId = info.messageId;
   } catch (err) {

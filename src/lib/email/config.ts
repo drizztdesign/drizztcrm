@@ -15,9 +15,15 @@ export function buildRefToken(): string {
   return s;
 }
 
+export function sanitizeSubject(subject: string): string {
+  // Strip leading Re:/RE:/Fwd: prefixes — they trigger spam filters on cold outreach
+  return subject.replace(/^(re|fwd?|fw):\s*/i, "").trim();
+}
+
 export function refTokenInSubject(subject: string, token: string): string {
-  // Append token at end of subject as [#XXXXXXXX]; case-insensitive matching when parsing
-  return `${subject.replace(/\s+\[#[A-Z0-9]{6,12}\]\s*$/, "")} [#${token}]`;
+  // Append tracking token at end. Strip any previous token first.
+  const clean = subject.replace(/\s+\[#[A-Z0-9]{6,12}\]\s*$/i, "").trim();
+  return `${clean} [#${token}]`;
 }
 
 export const REF_RE = /\[#([A-Z0-9]{6,12})\]/i;
