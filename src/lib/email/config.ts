@@ -20,6 +20,7 @@ export function sanitizeSubject(subject: string): string {
   return subject.replace(/^(re|fwd?|fw):\s*/i, "").trim();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function refTokenInSubject(subject: string, _token: string): string {
   // Token no longer added to subject — matching now uses In-Reply-To header.
   // Strip any legacy tokens that may already be in the subject.
