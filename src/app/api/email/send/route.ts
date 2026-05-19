@@ -95,9 +95,8 @@ export async function POST(request: Request) {
       html,
       headers: {
         "X-Mailer": "Drizzt CRM",
-        "X-Priority": "3",           // Normal priority (1=high triggers spam)
-        "Precedence": "bulk",
-        "X-CRM-Ref": refToken,       // Machine-readable ref (doesn't appear in subject visually)
+        "X-Priority": "3",
+        "X-CRM-Ref": refToken,
       },
     });
     messageId = info.messageId;
