@@ -292,11 +292,21 @@ export default function BuscadorPage() {
     }
   };
 
+  const getImportCandidates = () => {
+    const notYetImported = filtered.filter((p) => !imported[p.place_id]);
+    switch (importTarget) {
+      case "prospecto_email": return notYetImported.filter((p) => !!p.email);
+      case "prospecto_web":   return notYetImported.filter((p) => !!p.website && !p.email);
+      case "prospecto_frio":  return notYetImported.filter((p) => !p.website && !p.email);
+      default:                return notYetImported; // auto / lead / contactado → todos
+    }
+  };
+
   const importAll = async () => {
-    const pending = filtered.filter((p) => !imported[p.place_id]);
-    if (pending.length === 0) return;
+    const candidates = getImportCandidates();
+    if (candidates.length === 0) return;
     setImporting(true);
-    for (const p of pending) {
+    for (const p of candidates) {
       await importToCRM(p, importTarget);
     }
     setImporting(false);
@@ -570,9 +580,13 @@ export default function BuscadorPage() {
             </div>
 
             <p className="text-[12.5px] text-fg-2 -mt-2">
-              {lang === "es"
-                ? `${filtered.filter((p) => !imported[p.place_id]).length} negocios pendientes de importar`
-                : `${filtered.filter((p) => !imported[p.place_id]).length} businesses pending import`}
+              {(() => {
+                const n = getImportCandidates().length;
+                const total = filtered.filter((p) => !imported[p.place_id]).length;
+                return lang === "es"
+                  ? `${n} de ${total} negocios se importarán con este filtro`
+                  : `${n} of ${total} businesses will be imported with this filter`;
+              })()}
             </p>
 
             <div className="flex flex-col gap-2">
