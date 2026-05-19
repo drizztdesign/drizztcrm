@@ -52,7 +52,7 @@ export function SendEmailDialog({
       telefono: deal?.contact?.phone ?? "",
     };
     const fill = (s: string) =>
-      s.replace(/\{\{(\w+)\}\}/g, (_m, k) => vars[k] ?? `{{${k}}}`);
+      s.replace(/\{\{(\w+)\}\}/g, (_m, k) => vars[k.toLowerCase()] ?? vars[k] ?? "");
     setSubject(fill(t.subject ?? ""));
     setBody(fill(t.body));
   };

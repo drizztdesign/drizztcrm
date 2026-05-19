@@ -30,5 +30,5 @@ export function refTokenInSubject(subject: string, _token: string): string {
 export const REF_RE = /\[#([A-Z0-9]{6,12})\]/i;
 
 export function fillTemplate(text: string, vars: Record<string, string>): string {
-  return text.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? `{{${k}}}`);
+  return text.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k.toLowerCase()] ?? vars[k] ?? "");
 }

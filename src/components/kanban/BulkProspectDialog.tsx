@@ -14,12 +14,16 @@ interface Props {
 }
 
 function fillTemplate(body: string, deal: DealWithRelations): string {
-  return body
-    .replace(/\{\{empresa\}\}/gi, deal.company?.name ?? deal.title)
-    .replace(/\{\{nombre\}\}/gi, deal.contact?.name ?? deal.company?.name ?? deal.title)
-    .replace(/\{\{ciudad\}\}/gi, deal.company?.city ?? "")
-    .replace(/\{\{web\}\}/gi, deal.company?.website ?? "")
-    .replace(/\{\{telefono\}\}/gi, deal.contact?.phone ?? deal.company?.phone ?? "");
+  const contactName = deal.contact?.name || deal.company?.name || deal.title;
+  const vars: Record<string, string> = {
+    empresa:  deal.company?.name ?? deal.title,
+    nombre:   contactName,
+    contacto: contactName,
+    ciudad:   deal.company?.city ?? "",
+    web:      deal.company?.website ?? "",
+    telefono: deal.contact?.phone ?? deal.company?.phone ?? "",
+  };
+  return body.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k.toLowerCase()] ?? vars[k] ?? "");
 }
 
 export function BulkProspectDialog({ stage, items, onClose }: Props) {
