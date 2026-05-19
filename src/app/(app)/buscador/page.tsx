@@ -8,7 +8,7 @@ import { useCreateDeal } from "@/lib/queries/deals";
 import type { LeadStage } from "@/lib/supabase/types";
 import { STAGE_META } from "@/lib/domain";
 import { cn } from "@/lib/cn";
-import { Search, Globe, Phone, Star, Plus, Check, Download, Loader2, Mail } from "lucide-react";
+import { Search, Globe, Phone, Star, Plus, Check, Download, Loader2, Mail, X } from "lucide-react";
 
 interface PlaceResult {
   place_id: string;
@@ -52,6 +52,8 @@ export default function BuscadorPage() {
   const [maxres, setMaxres] = useState(20);
   const [filterMode, setFilterMode] = useState<"noweb" | "all">("noweb");
   const [importTarget, setImportTarget] = useState<"auto" | LeadStage>("auto");
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -293,15 +295,12 @@ export default function BuscadorPage() {
   const importAll = async () => {
     const pending = filtered.filter((p) => !imported[p.place_id]);
     if (pending.length === 0) return;
-    const stageLabel = importTarget === "auto"
-      ? (lang === "es" ? "automático" : "auto")
-      : (lang === "es" ? STAGE_META[importTarget as LeadStage].labelEs : STAGE_META[importTarget as LeadStage].labelEn);
-    if (!confirm(lang === "es"
-      ? `¿Importar ${pending.length} negocios al CRM? → columna "${stageLabel}"`
-      : `Import ${pending.length} businesses? → column "${stageLabel}"`)) return;
+    setImporting(true);
     for (const p of pending) {
       await importToCRM(p, importTarget);
     }
+    setImporting(false);
+    setImportDialogOpen(false);
   };
 
   const exportCSV = () => {
@@ -415,27 +414,13 @@ export default function BuscadorPage() {
               >
                 {lang === "es" ? "Todos" : "All"} ({results.length})
               </button>
-              <div className="flex items-center gap-1 rounded-md border border-border bg-bg-2 overflow-hidden">
-                <select
-                  value={importTarget}
-                  onChange={(e) => setImportTarget(e.target.value as "auto" | LeadStage)}
-                  className="h-[30px] pl-2 pr-1 text-[11.5px] bg-transparent border-0 outline-none text-fg-1"
-                >
-                  <option value="auto">{lang === "es" ? "Auto (email/web)" : "Auto (email/web)"}</option>
-                  <option value="prospecto_email">{lang === "es" ? "Con email" : "Has email"}</option>
-                  <option value="prospecto_web">{lang === "es" ? "Sin email" : "No email"}</option>
-                  <option value="prospecto_frio">{lang === "es" ? "Sin web" : "No website"}</option>
-                  <option value="lead">Lead</option>
-                  <option value="contactado">{lang === "es" ? "Contactado" : "Contacted"}</option>
-                </select>
-                <button
-                  onClick={importAll}
-                  className="inline-flex items-center gap-1 px-2.5 h-[30px] text-[11.5px] font-semibold bg-accent text-accent-ink hover:brightness-105 border-l border-accent/30"
-                >
-                  <Plus size={11} strokeWidth={2} />
-                  {lang === "es" ? "Importar todos" : "Import all"}
-                </button>
-              </div>
+              <button
+                onClick={() => setImportDialogOpen(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11.5px] rounded-md bg-accent text-accent-ink font-semibold hover:brightness-105"
+              >
+                <Plus size={12} strokeWidth={2} />
+                {lang === "es" ? "Importar todos" : "Import all"}
+              </button>
               <button
                 onClick={exportCSV}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11.5px] rounded-md bg-bg-2 border border-border hover:border-border-strong"
@@ -567,6 +552,80 @@ export default function BuscadorPage() {
           })}
         </div>
       </div>
+
+      {/* Import destination dialog */}
+      {importDialogOpen && (
+        <>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={() => !importing && setImportDialogOpen(false)} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-w-[95vw] bg-bg-1 border border-border rounded-2xl z-50 shadow-pop p-5 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[15px] font-semibold m-0">
+                {lang === "es" ? "¿A qué columna importar?" : "Which column to import to?"}
+              </h2>
+              {!importing && (
+                <button onClick={() => setImportDialogOpen(false)} className="text-fg-2 hover:text-fg-0">
+                  <X size={17} strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
+
+            <p className="text-[12.5px] text-fg-2 -mt-2">
+              {lang === "es"
+                ? `${filtered.filter((p) => !imported[p.place_id]).length} negocios pendientes de importar`
+                : `${filtered.filter((p) => !imported[p.place_id]).length} businesses pending import`}
+            </p>
+
+            <div className="flex flex-col gap-2">
+              {([
+                { value: "auto",           labelEs: "Auto — según email/web",   labelEn: "Auto — by email/web",    desc_es: "Con email → col. «Con email», con web → «Sin email», sin web → «Sin web»", desc_en: "Has email → «Has email», has web → «No email», no web → «No website»" },
+                { value: "lead",           labelEs: "Lead",                      labelEn: "Lead",                   desc_es: "Todos a la columna Lead del pipeline",    desc_en: "All to the Lead column" },
+                { value: "contactado",     labelEs: "Contactado",                labelEn: "Contacted",              desc_es: "Ya has hablado con ellos",               desc_en: "You've already spoken with them" },
+                { value: "prospecto_email",labelEs: "Con email",                 labelEn: "Has email",              desc_es: "Listos para enviar email en masa",        desc_en: "Ready for bulk email" },
+                { value: "prospecto_web",  labelEs: "Sin email",                 labelEn: "No email",               desc_es: "Tienen web pero sin email encontrado",   desc_en: "Has website but no email found" },
+                { value: "prospecto_frio", labelEs: "Sin web",                   labelEn: "No website",             desc_es: "Sin web ni email — contacto frío",       desc_en: "No website or email — cold contact" },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setImportTarget(opt.value as "auto" | LeadStage)}
+                  className={cn(
+                    "w-full text-left px-3.5 py-2.5 rounded-xl border transition-colors",
+                    importTarget === opt.value
+                      ? "border-accent bg-accent-soft"
+                      : "border-border bg-bg-2 hover:border-border-strong"
+                  )}
+                >
+                  <div className={cn("text-[13px] font-semibold", importTarget === opt.value ? "text-accent" : "text-fg-0")}>
+                    {lang === "es" ? opt.labelEs : opt.labelEn}
+                  </div>
+                  <div className="text-[11px] text-fg-2 mt-0.5">
+                    {lang === "es" ? opt.desc_es : opt.desc_en}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => setImportDialogOpen(false)}
+                disabled={importing}
+                className="flex-1 h-10 rounded-lg bg-bg-2 border border-border text-[13px] font-medium hover:border-border-strong disabled:opacity-50"
+              >
+                {lang === "es" ? "Cancelar" : "Cancel"}
+              </button>
+              <button
+                onClick={importAll}
+                disabled={importing}
+                className="flex-1 h-10 rounded-lg bg-accent text-accent-ink font-semibold text-[13px] hover:brightness-105 disabled:opacity-60 inline-flex items-center justify-center gap-2"
+              >
+                {importing ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} strokeWidth={2} />}
+                {importing
+                  ? (lang === "es" ? "Importando…" : "Importing…")
+                  : (lang === "es" ? "Importar todos" : "Import all")}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
