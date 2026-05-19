@@ -6,6 +6,7 @@ import { useUI } from "@/store/ui";
 import { useCreateCompany, useCreateContact, useCompanies } from "@/lib/queries/contacts";
 import { useCreateDeal } from "@/lib/queries/deals";
 import type { LeadStage } from "@/lib/supabase/types";
+import { STAGE_META } from "@/lib/domain";
 import { cn } from "@/lib/cn";
 import { Search, Globe, Phone, Star, Plus, Check, Download, Loader2, Mail } from "lucide-react";
 
@@ -50,6 +51,7 @@ export default function BuscadorPage() {
   const [radius, setRadius] = useState(3000);
   const [maxres, setMaxres] = useState(20);
   const [filterMode, setFilterMode] = useState<"noweb" | "all">("noweb");
+  const [importTarget, setImportTarget] = useState<"auto" | LeadStage>("auto");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -232,7 +234,7 @@ export default function BuscadorPage() {
     }
   };
 
-  const importToCRM = async (p: PlaceResult) => {
+  const importToCRM = async (p: PlaceResult, stageOverride: "auto" | LeadStage = "auto") => {
     try {
       // Check if a company with same name already exists
       let companyId: string | null = companies.find((c) => c.name.toLowerCase() === p.name.toLowerCase())?.id ?? null;
@@ -257,8 +259,10 @@ export default function BuscadorPage() {
         role: "",
       });
 
-      // Segment into prospecting stage based on available contact data
-      const importStage: LeadStage = p.email
+      // Segment into prospecting stage — respects importTarget override
+      const importStage: LeadStage = (stageOverride && stageOverride !== "auto")
+        ? stageOverride
+        : p.email
         ? "prospecto_email"
         : p.hasWeb
         ? "prospecto_web"
@@ -289,9 +293,14 @@ export default function BuscadorPage() {
   const importAll = async () => {
     const pending = filtered.filter((p) => !imported[p.place_id]);
     if (pending.length === 0) return;
-    if (!confirm(lang === "es" ? `¿Importar ${pending.length} negocios al CRM?` : `Import ${pending.length} businesses?`)) return;
+    const stageLabel = importTarget === "auto"
+      ? (lang === "es" ? "automático" : "auto")
+      : (lang === "es" ? STAGE_META[importTarget as LeadStage].labelEs : STAGE_META[importTarget as LeadStage].labelEn);
+    if (!confirm(lang === "es"
+      ? `¿Importar ${pending.length} negocios al CRM? → columna "${stageLabel}"`
+      : `Import ${pending.length} businesses? → column "${stageLabel}"`)) return;
     for (const p of pending) {
-      await importToCRM(p);
+      await importToCRM(p, importTarget);
     }
   };
 
@@ -406,12 +415,27 @@ export default function BuscadorPage() {
               >
                 {lang === "es" ? "Todos" : "All"} ({results.length})
               </button>
-              <button
-                onClick={importAll}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11.5px] rounded-md bg-bg-2 border border-border hover:border-accent hover:text-accent"
-              >
-                <Plus size={12} />{lang === "es" ? "Importar todos" : "Import all"}
-              </button>
+              <div className="flex items-center gap-1 rounded-md border border-border bg-bg-2 overflow-hidden">
+                <select
+                  value={importTarget}
+                  onChange={(e) => setImportTarget(e.target.value as "auto" | LeadStage)}
+                  className="h-[30px] pl-2 pr-1 text-[11.5px] bg-transparent border-0 outline-none text-fg-1"
+                >
+                  <option value="auto">{lang === "es" ? "Auto (email/web)" : "Auto (email/web)"}</option>
+                  <option value="prospecto_email">{lang === "es" ? "Con email" : "Has email"}</option>
+                  <option value="prospecto_web">{lang === "es" ? "Sin email" : "No email"}</option>
+                  <option value="prospecto_frio">{lang === "es" ? "Sin web" : "No website"}</option>
+                  <option value="lead">Lead</option>
+                  <option value="contactado">{lang === "es" ? "Contactado" : "Contacted"}</option>
+                </select>
+                <button
+                  onClick={importAll}
+                  className="inline-flex items-center gap-1 px-2.5 h-[30px] text-[11.5px] font-semibold bg-accent text-accent-ink hover:brightness-105 border-l border-accent/30"
+                >
+                  <Plus size={11} strokeWidth={2} />
+                  {lang === "es" ? "Importar todos" : "Import all"}
+                </button>
+              </div>
               <button
                 onClick={exportCSV}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11.5px] rounded-md bg-bg-2 border border-border hover:border-border-strong"

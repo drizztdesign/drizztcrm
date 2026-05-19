@@ -4,6 +4,8 @@ import { X, Send, Loader2 } from "lucide-react";
 import { useT } from "@/lib/useT";
 import { useUI } from "@/store/ui";
 import { useTemplates } from "@/lib/queries/templates";
+import { useUpdateDealStage } from "@/lib/queries/deals";
+import { PROSPECTING_STAGES } from "@/lib/domain";
 import type { DealWithRelations } from "@/lib/supabase/types";
 
 export function SendEmailDialog({
@@ -16,6 +18,7 @@ export function SendEmailDialog({
   const { lang } = useT();
   const show = useUI((s) => s.showToast);
   const { data: templates = [] } = useTemplates();
+  const updateStage = useUpdateDealStage();
 
   const emailTemplates = useMemo(() => templates.filter((t) => t.channel === "email"), [templates]);
 
@@ -74,6 +77,10 @@ export function SendEmailDialog({
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`);
+      // Advance stage to "contactado" if still in early stage
+      if (deal && (deal.stage === "lead" || PROSPECTING_STAGES.includes(deal.stage))) {
+        updateStage.mutate({ id: deal.id, stage: "contactado" });
+      }
       show(lang === "es" ? "Email enviado" : "Email sent", "ok");
       onClose();
     } catch (e) {
