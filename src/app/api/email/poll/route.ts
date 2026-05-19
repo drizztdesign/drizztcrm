@@ -95,22 +95,48 @@ export async function GET(request: Request) {
         const html = parsed.html === false ? "" : (parsed.html ?? "");
         const inReplyTo = parsed.inReplyTo ?? null;
 
-        // Try to match ref_token from subject
-        const m = REF_RE.exec(subject);
         let dealId: string | null = null;
         let contactId: string | null = null;
-        let refToken = m?.[1]?.toUpperCase() ?? "";
+        let refToken = "INBOUND";
 
-        if (refToken) {
+        // Priority 1: In-Reply-To header — standard email threading (no token in subject needed)
+        const replyToIds = [
+          inReplyTo,
+          ...(Array.isArray(parsed.references) ? parsed.references : parsed.references ? [parsed.references] : []),
+        ].filter(Boolean) as string[];
+
+        for (const msgId of replyToIds) {
           const { data: orig } = await sb
             .from("email_messages")
             .select("deal_id,contact_id,ref_token")
             .eq("owner_id", ownerId)
-            .eq("ref_token", refToken)
+            .eq("message_id", msgId)
+            .eq("direction", "out")
             .limit(1);
           if (orig?.[0]) {
             dealId = orig[0].deal_id;
             contactId = orig[0].contact_id;
+            refToken = orig[0].ref_token ?? "REPLY";
+            break;
+          }
+        }
+
+        // Priority 2: legacy ref_token in subject (backwards compat with old sent emails)
+        if (!dealId) {
+          const m = REF_RE.exec(subject);
+          const legacyToken = m?.[1]?.toUpperCase() ?? "";
+          if (legacyToken) {
+            const { data: orig } = await sb
+              .from("email_messages")
+              .select("deal_id,contact_id,ref_token")
+              .eq("owner_id", ownerId)
+              .eq("ref_token", legacyToken)
+              .limit(1);
+            if (orig?.[0]) {
+              dealId = orig[0].deal_id;
+              contactId = orig[0].contact_id;
+              refToken = legacyToken;
+            }
           }
         }
 

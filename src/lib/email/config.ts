@@ -20,10 +20,10 @@ export function sanitizeSubject(subject: string): string {
   return subject.replace(/^(re|fwd?|fw):\s*/i, "").trim();
 }
 
-export function refTokenInSubject(subject: string, token: string): string {
-  // Append tracking token at end. Strip any previous token first.
-  const clean = subject.replace(/\s+\[#[A-Z0-9]{6,12}\]\s*$/i, "").trim();
-  return `${clean} [#${token}]`;
+export function refTokenInSubject(subject: string, _token: string): string {
+  // Token no longer added to subject — matching now uses In-Reply-To header.
+  // Strip any legacy tokens that may already be in the subject.
+  return subject.replace(/\s+\[#[A-Z0-9]{6,12}\]\s*$/i, "").trim();
 }
 
 export const REF_RE = /\[#([A-Z0-9]{6,12})\]/i;
